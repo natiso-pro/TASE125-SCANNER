@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="he" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1d4f7c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>סורק מניות ת״א-125</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6f3;--ink:#14212b;--mut:#62717b;--card:#fff;--line:#d9dfd8;--buy:#17794a;--sell:#be3a31;--hold:#85752a;--acc:#1d4f7c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1519;--ink:#e5ebee;--mut:#92a0a8;--card:#172029;--line:#28343e;--buy:#4cc38a;--sell:#ff7b72;--hold:#d6c25a;--acc:#7fb5e6}}
+:root[data-theme="dark"]{--bg:#0f1519;--ink:#e5ebee;--mut:#92a0a8;--card:#172029;--line:#28343e;--buy:#4cc38a;--sell:#ff7b72;--hold:#d6c25a;--acc:#7fb5e6}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 Heebo,Arial,sans-serif;padding:12px}
+h1{font-size:20px;margin:0 0 2px}.sub{color:var(--mut);font-size:13px;margin:0 0 10px}
+.bar{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+button,.chip{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:5px 11px;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.on{background:var(--acc);border-color:var(--acc);color:#fff}
+[data-theme="dark"] .on{color:#0f1519}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .on{color:#0f1519}}
+.grid{display:grid;gap:12px}
+@media(min-width:860px){.grid{grid-template-columns:minmax(330px,1fr) 1.5fr;align-items:start}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px}
+table{width:100%;border-collapse:collapse}
+th{font-weight:500;color:var(--mut);font-size:12px;text-align:right;padding:4px 6px}
+td{padding:7px 6px;border-top:1px solid var(--line)}
+tr.r{cursor:pointer}tr.sel td{background:color-mix(in srgb,var(--acc) 12%,transparent)}
+.num{direction:ltr;text-align:left;font-variant-numeric:tabular-nums}
+.b{font-weight:700;font-size:13px}.קנייה{color:var(--buy)}.מכירה{color:var(--sell)}.המתנה{color:var(--hold)}
+.up{color:var(--buy)}.dn{color:var(--sell)}
+#cvw{position:relative}canvas{width:100%;height:320px;display:block;direction:ltr;touch-action:pan-y}
+#tip{position:absolute;top:4px;left:8px;font-size:12px;color:var(--mut);direction:ltr}
+ul{margin:6px 0 0;padding:0 18px}li{margin:2px 0}
+.tbl{overflow-x:auto}.note{font-size:12px;color:var(--mut);margin-top:8px}
+dialog{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:12px;width:min(680px,calc(100% - 24px));max-height:85vh;padding:14px 16px}
+dialog::backdrop{background:#0008}dialog h2{font-size:18px;margin:0 0 6px}dialog h3{font-size:15px;margin:14px 0 4px}dialog p{margin:4px 0}
+.rep{padding:2px 8px;font-size:12px}label.fl{display:block;margin:4px 0}
+#lst{max-height:min(70vh,640px);overflow-y:auto}#lst thead th{position:sticky;top:0;background:var(--card);z-index:1}
+#q{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 10px;width:100%;margin-bottom:6px}
+#lst{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+#cards{display:none;flex-direction:column;gap:8px}
+@media(max-width:700px){#lst table{display:none}#cards{display:flex}}
+th[data-s]{cursor:pointer;user-select:none}
+tr.rb{background:color-mix(in srgb,var(--buy) 9%,transparent)}tr.rs2{background:color-mix(in srgb,var(--sell) 9%,transparent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:6px;cursor:pointer}.card.sel{border-color:var(--acc);border-width:2px}
+.pill{padding:1px 9px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid currentColor}
+.dcard{flex:1;min-width:130px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer;font-size:13px}.dcard b{font-size:20px;display:block}
+</style></head><body>
+<h1>סורק מניות ת״א-125</h1>
+<p class="sub">איתותים טכניים לפי ממוצעים נעים, RSI, MACD ונפח מסחר. <b id="src">נתוני הדגמה</b></p>
+<div class="bar">
+ <button id="au"></button><button id="hlp">הסברים</button><button id="pf">תיק מדומה</button><button id="st">אסטרטגיה</button><button id="cmp">השוואה לבורסה</button><button id="pea" style="display:none;color:var(--sell);border-color:var(--sell)"></button>
+ <button id="th">מצב כהה/בהיר</button>
+</div>
+<div class="bar" id="svbar"></div>
+<div class="bar" id="params"></div>
+<div class="bar" id="dash" style="margin-bottom:8px"></div>
+<div class="grid">
+ <div class="panel">
+  <input id="q" type="search" placeholder="חיפוש מניה…" autocomplete="off">
+  <div class="bar" id="flt"></div>
+  <div class="tbl" id="lst"><table><thead id="lh"></thead><tbody id="rows"></tbody></table><div id="cards"></div></div>
+ </div>
+ <div class="panel">
+  <div class="b" id="ttl" style="font-size:16px"></div>
+  <div class="bar"><button id="bb" class="on">קנייה (מדומה)</button><button id="bs">מכירה (מדומה)</button></div>
+  <div class="bar" id="res"></div>
+  <div class="bar" id="ovl"></div>
+  <div id="cvw"><canvas id="cv"></canvas><div id="tip"></div></div>
+  <div id="why"></div>
+ </div>
+</div>
+<p class="note">הנתונים מתעדכנים אוטומטית כשהסורק פתוח דרך השרת המקומי (הקיצור או start.bat): ההיסטוריה נמשכת בעת הפתיחה ובכל כמה שעות, והמחיר העדכני ברציפות. הנתונים נמשכים מ-Yahoo Finance (מקור לא רשמי, בדרך כלל באיחור של עד 15 דקות או סוף יום). מכפיל הרווח הוא על בסיס 12 חודשים אחרונים; מניה בהפסד מוצגת עם מקף. האיתותים הם כלי עזר טכני ואינם ייעוץ השקעות.</p>
+<dialog id="dlg"><div id="dbody"></div><div class="bar"><button id="dx">סגירה</button></div></dialog>
+<script>const OFF={"asof":"2026-11-19","s":{"טבע":[139.2,5.823,162422.0,"לא"],"אלביט מערכות":[2314.2,5.478,108492.0,"לא"],"לאומי":[73.97,5.405,108588.0,"לא"],"פועלים":[73.45,5.194,95820.0,"לא"],"הפניקס":[171.8,4.466,43379.0,"לא"],"דיסקונט א":[29.99,4.062,36698.0,"לא"],"טאואר":[443.0,3.838,50288.0,"לא"],"מזרחי טפחות":[211.7,3.603,55168.0,"לא"],"נובה":[1026.0,3.466,31316.0,"לא"],"אנלייט אנרגיה":[213.0,3.267,29823.0,"לא"],"פאלו אלטו":[1070.0,2.528,873893.0,"לא"],"הראל השקעות":[182.5,2.366,37497.0,"לא"],"בזק":[6.79,2.065,18656.0,"לא"],"כלל עסקי ביטוח":[259.1,1.993,20949.0,"לא"],"נייס":[300.9,1.947,17260.0,"לא"],"אורמת טכנו":[296.5,1.856,16770.0,"לא"],"או פי סי אנרגיה":[92.35,1.776,28652.0,"לא"],"עזריאלי קבוצה":[324.7,1.477,40431.0,"לא"],"נאוויטס פטר יהש":[119.9,1.456,14812.0,"לא"],"נקסט ויז'ן":[176.1,1.408,16317.0,"לא"],"ביג":[695.0,1.315,18011.0,"לא"],"הבורסה לניע בתא":[125.1,1.233,11599.0,"לא"],"מגה אור":[455.7,1.232,17385.0,"כן"],"בינלאומי":[210.0,1.212,21062.0,"לא"],"מנורה מב החז":[490.1,1.186,30623.0,"לא"],"מגדל ביטוח":[17.98,1.16,19056.0,"לא"],"איי.סי.אל":[13.81,1.105,17825.0,"לא"],"מליסרון":[392.2,1.015,18708.0,"לא"],"קמטק":[322.2,1.013,14766.0,"לא"],"ניו-מד אנרג יהש":[17.08,0.999,20083.0,"לא"],"פז אנרגיה":[815.1,0.972,8780.0,"לא"],"אל על":[21.83,0.829,12931.0,"לא"],"מבנה":[12.83,0.781,9287.0,"לא"],"שטראוס":[115.0,0.776,13492.0,"לא"],"דלק קבוצה":[78.05,0.774,14274.0,"לא"],"דוראל אנרגיה":[50.24,0.753,11333.0,"לא"],"שיכון ובינוי":[16.95,0.711,9880.0,"לא"],"שפיר הנדסה":[39.86,0.697,14309.0,"לא"],"שופרסל":[31.26,0.692,8340.0,"לא"],"בית שמש":[712.5,0.67,6805.0,"לא"],"מטריקס":[111.9,0.596,10358.0,"לא"],"אנרג'יקס":[17.59,0.571,10523.0,"לא"],"ג'נריישן קפיטל":[2.31,0.549,5065.0,"לא"],"בזן":[2.01,0.488,6299.0,"לא"],"מיטב השקעות":[106.0,0.48,9032.0,"לא"],"אמות":[17.79,0.467,8790.0,"לא"],"אלוני חץ":[26.15,0.452,5917.0,"לא"],"פרטנר":[34.27,0.45,6433.0,"לא"],"פתאל החזקות":[642.0,0.413,10593.0,"לא"],"פיבי":[272.4,0.41,9657.0,"לא"],"מקס סטוק":[34.78,0.404,4866.0,"לא"],"אלקטרה":[109.0,0.4,8357.0,"לא"],"ישראמקו יהש":[2.2,0.391,5732.0,"לא"],"אנרג'יאן":[29.44,0.384,5425.0,"לא"],"ריט 1":[21.2,0.376,4294.0,"לא"],"רציו יהש":[4.89,0.37,5496.0,"לא"],"נופר אנרג'י":[113.2,0.358,4496.0,"לא"],"דמרי":[366.8,0.352,8453.0,"לא"],"חילן":[245.5,0.344,5638.0,"לא"],"קנון":[190.3,0.334,9916.0,"לא"],"סלקום":[31.07,0.311,5250.0,"לא"],"פורמולה מערכות":[367.4,0.309,5634.0,"לא"],"וואן טכנולוגיות":[69.25,0.294,5100.0,"לא"],"נאייקס":[167.0,0.284,6366.0,"לא"],"תורפז":[47.6,0.276,5188.0,"לא"],"חברה לישראל":[73.15,0.25,5540.0,"לא"],"משק אנרגיה":[8.07,0.249,5976.0,"לא"],"אקונרג'י":[58.13,0.234,4489.0,"לא"],"אינרום":[24.9,0.234,3722.0,"לא"],"ארגו פרופרטיז":[125.8,0.231,2966.0,"לא"],"רמי לוי":[315.3,0.231,4343.0,"לא"],"ורידיס":[48.15,0.223,7392.0,"לא"],"קיסטון אינפרא":[18.45,0.222,3973.0,"לא"],"ישראכרט":[10.37,0.221,3378.0,"לא"],"ארפורט סיטי":[54.23,0.217,5649.0,"לא"],"אשטרום קבוצה":[50.39,0.214,5620.0,"לא"],"גב ים":[36.32,0.213,8012.0,"לא"],"אאורה":[15.85,0.211,4503.0,"לא"],"פוקס":[291.7,0.208,4057.0,"לא"],"פריורטק":[222.9,0.208,2643.0,"לא"],"ישרוטל":[128.1,0.205,7700.0,"לא"],"איילון":[152.3,0.196,4321.0,"לא"],"איידיאיי ביטוח":[245.3,0.19,3628.0,"לא"],"מבטח שמיר":[356.4,0.187,3467.0,"לא"],"רימון":[107.4,0.183,4228.0,"לא"],"סקופ":[251.7,0.177,3331.0,"לא"],"ישראל קנדה":[10.81,0.17,4681.0,"לא"],"אייאיאס":[615.2,0.152,3578.0,"לא"],"דלתא גליל":[200.1,0.143,5251.0,"כן"],"איביאי בית השק":[382.3,0.13,5420.0,"לא"],"דניה סיבוס":[113.5,0.129,3736.0,"לא"],"מור השקעות":[41.29,0.128,3012.0,"לא"],"דנאל":[438.2,0.121,2614.0,"לא"],"אקויטל":[95.05,0.11,3453.0,"לא"],"נטו מלינדה":[113.1,0.109,2361.0,"לא"],"אפריקה מגורים":[194.6,0.107,2465.0,"לא"],"אר פי אופטיקל":[30.37,0.103,2271.0,"לא"],"אפי נכסים":[172.3,0.101,7212.0,"לא"],"יוחננוף":[313.6,0.097,4543.0,"לא"],"רבוע נדלן":[280.5,0.093,3422.0,"לא"],"להב":[10.84,0.084,3178.0,"לא"],"שוב אנרגיה":[3.81,0.082,3732.0,"לא"],"סאמיט":[36.32,0.08,2687.0,"לא"],"אופקו הלת'":[5.46,0.077,3603.0,"לא"],"קבוצת תדהר":[162.8,0.073,8271.0,"לא"],"לפידות קפיטל":[72.04,0.073,4293.0,"לא"],"פרשקובסקי":[104.5,0.071,2236.0,"לא"],"אזורים":[13.45,0.071,2957.0,"לא"],"קרסו מוטורס":[26.01,0.069,2467.0,"לא"],"אלקו":[101.3,0.062,2648.0,"לא"],"אמפא":[13.86,0.042,3492.0,"לא"],"תמר פטרוליום":[25.95,0.04,2322.0,"לא"],"עמרם":[30.0,0.04,2364.0,"לא"],"וילאר":[174.0,0.037,3058.0,"לא"],"ישרס":[705.9,0.034,3454.0,"לא"],"יוניברסל מוטורס":[25.38,0.033,3198.0,"לא"],"טלסיס":[326.5,0.033,2983.0,"לא"],"ווישור גלובלטק":[12.14,0.032,1827.0,"לא"],"אפקון החזקות":[515.5,0.029,3127.0,"לא"],"מספנות ישראל":[105.0,0.026,2625.0,"לא"],"דלתא מותגים":[98.23,0.024,2458.0,"לא"],"אלפא תאו":[39.74,0.018,3675.0,"לא"],"בגירה":[9.99,0.009,2774.0,"לא"],"אביסרור":[10.24,0.005,3202.0,"לא"]}};</script>
+<script src="data.js" charset="utf-8"></script>
+<script>
+const $=id=>document.getElementById(id);
+const P={ma:true,rsi:true,macd:true,vol:true},PN={ma:'ממוצעים נעים',rsi:'RSI',macd:'MACD',vol:'נפח מסחר'};
+const RES=[['D','יומי'],['W','שבועי'],['M','חודשי'],['Y','שנתי']],LIM={D:120,W:104,M:60,Y:20};
+let FX=null,peBad={},mkv=0,mkc=null,mkk=-1,rfBusy=false,autoOn=(()=>{try{return localStorage.getItem('auto')!='0'}catch(e){return true}})(),real=false,data={},sel=null,res='D',flt='all',ov={ma20:true,ma50:true,vol:true,mk:false,rsi:false,macd:false,cmp:false,sty:'area'},hov=-1,view=[];
+const fpe=p=>p>0?p.toFixed(1):'–';
+const avg=a=>a.reduce((x,y)=>x+y,0)/(a.length||1);
+function sma(c,n){return c.map((_,i)=>i<n-1?null:avg(c.slice(i-n+1,i+1)))}
+const ema=(a,n)=>{const k=2/(n+1);let p=a[0];return a.map((x,i)=>p=i?x*k+p*(1-k):x)};
+function rsi(c,n){const o=c.map(()=>null);let g=0,l=0;for(let i=1;i<c.length;i++){const d=c[i]-c[i-1];if(i<=n){g+=Math.max(d,0);l+=Math.max(-d,0);if(i==n){g/=n;l/=n;o[i]=100-100/(1+g/(l||1e-9))}}else{g=(g*(n-1)+Math.max(d,0))/n;l=(l*(n-1)+Math.max(-d,0))/n;o[i]=100-100/(1+g/(l||1e-9))}}return o}
+function macd(c){const e1=ema(c,12),e2=ema(c,26),m=e1.map((x,i)=>x-e2[i]);return{m,s:ema(m,9)}}
+function inds(rows){const c=rows.map(r=>r.c),v=rows.map(r=>r.v);const rt=c.map((x,i)=>i?x/c[i-1]-1:0),sd=n=>rt.map((_,i)=>{if(i<n)return null;let s=0,q=0;for(let j=i-n+1;j<=i;j++){s+=rt[j];q+=rt[j]*rt[j]}const m=s/n;return Math.sqrt(Math.max(0,q/n-m*m))});
+ return{c,v,s50:sma(c,50),s200:sma(c,200),R:rsi(c,14),M:macd(c),v20:sma(v,20),rv20:sd(20),rv100:sd(100)}}
+function sigAt1(I,n){
+ const c=I.c,s50=I.s50[n],s200=I.s200[n],R=I.R[n],M=I.M,va=n?I.v20[n-1]:null,chg=n?c[n]/c[n-1]-1:0,f=[];let mx=0;
+ if(P.ma){mx+=2;if(s50!=null)f.push([c[n]>s50?1:-1,c[n]>s50?'המחיר מעל ממוצע 50 יום':'המחיר מתחת לממוצע 50 יום']);if(s200!=null)f.push([s50>s200?1:-1,s50>s200?'ממוצע 50 מעל ממוצע 200 (צלב זהב)':'ממוצע 50 מתחת לממוצע 200 (צלב מוות)'])}
+ if(P.rsi&&R!=null){mx+=2;const t='RSI '+R.toFixed(0);f.push(R<30?[2,t+': מכירת יתר']:R>70?[-2,t+': קנייה ביתר']:[0,t+': אזור נייטרלי'])}
+ if(P.macd){mx+=1;f.push(M.m[n]>M.s[n]?[1,'MACD מעל קו האיתות']:[-1,'MACD מתחת לקו האיתות'])}
+ if(P.vol&&va){mx+=1;f.push(I.v[n]>1.5*va?[chg>=0?1:-1,'נפח חריג '+(chg>=0?'בעלייה':'בירידה')]:[0,'נפח מסחר רגיל'])}
+ const sc=f.reduce((a,x)=>a+x[0],0),t=Math.max(1,Math.ceil(mx/2));
+ return{sc,f,price:c[n],chg,R,act:!f.length?'המתנה':sc>=t?'קנייה':sc<=-t?'מכירה':'המתנה'};
+}
+let SIGV=(()=>{try{return localStorage.getItem('sv')=='v2'?'v2':'v1'}catch(e){return'v1'}})();
+const PV2={trend:true,macd:true,rsi:true,mkt:true,vol:true},MN2={trend:'מגמת מניה',macd:'MACD',rsi:'RSI',mkt:'מגמת שוק',vol:'תנודתיות'};
+function buildMkt(){
+ const m=new Map();
+ for(const k in data){const r=data[k].rows;for(let i=1;i<r.length;i++){const t=+r[i].d,x=r[i].c/r[i-1].c-1,e=m.get(t);if(e){e[0]+=x;e[1]++}else m.set(t,[x,1])}}
+ const ts=[...m.keys()].sort((a,b)=>a-b);let c=100;const cs=ts.map(t=>{const e=m.get(t);c*=1+e[0]/e[1];return c}),s50=sma(cs,50),ix=new Map(ts.map((t,i)=>[t,i]));
+ return{on:t=>{const i=ix.get(t);return i==null||s50[i]==null?null:cs[i]>s50[i]},at:t=>{let i=ix.get(t);if(i==null){i=-1;for(let j=0;j<ts.length;j++){if(ts[j]<=t)i=j;else break}}return i<0?null:cs[i]}}}
+const MK0=()=>{if(mkk!=mkv||!mkc){mkc=buildMkt();mkk=mkv}return mkc};
+function sigAt2(I,n,on){
+ const c=I.c,p=c[n],s50=I.s50[n],s200=I.s200[n],R=I.R[n],M=I.M,F=PV2,f=[],conds=[],ck=(ok,t)=>{f.push([ok?1:-1,t]);conds.push(ok)};
+ const up=s50!=null&&s200!=null&&p>s50&&s50>s200,mb=n>=2&&M.m[n]>M.s[n]&&M.m[n-1]>M.s[n-1]&&M.m[n-2]>M.s[n-2],hot=R!=null&&R>=75;
+ const sp=I.rv20[n]!=null&&I.rv100[n]?I.rv20[n]/I.rv100[n]:null,spike=sp!=null&&sp>2.5;
+ const below2=n>=1&&s50!=null&&I.s50[n-1]!=null&&p<s50&&c[n-1]<I.s50[n-1],death=s50!=null&&s200!=null&&s50<s200;
+ const chg=n?p/c[n-1]-1:0,mom=n>=60?(p/c[n-60]-1)*100:0;
+ if(F.trend)ck(up,up?'מגמת עלייה: מחיר מעל ממוצע 50, שמעל ממוצע 200':'אין מגמת עלייה מלאה (מחיר, ממוצע 50, ממוצע 200)');
+ if(F.macd)ck(mb,mb?'MACD מעל קו האיתות 3 ימים ברציפות':'MACD לא מעל קו האיתות 3 ימים ברציפות');
+ if(F.rsi&&R!=null)ck(!hot,'RSI '+R.toFixed(0)+(hot?': חם מדי, לא נכנסים':': לא חם מדי'));
+ if(F.mkt)ck(on!==false,on===false?'השוק (מדד משקל-שווה של המניות) מתחת לממוצע 50: לא נכנסים':'מגמת השוק תומכת');
+ if(F.vol&&sp!=null)ck(!spike,spike?'זינוק בתנודתיות (פי '+sp.toFixed(1)+'): לא נכנסים':'תנודתיות רגילה');
+ const sell=below2||death;
+ if(sell)f.push([-1,death?'צלב מוות: ממוצע 50 מתחת לממוצע 200':'המחיר מתחת לממוצע 50 יומיים ברציפות: יציאה']);
+ const act=sell?'מכירה':(conds.length&&conds.every(Boolean)?'קנייה':'המתנה');
+ return{sc:act=='קנייה'?1e3+mom:act=='מכירה'?-1e3:mom,f,price:p,chg,R,act}}
+function sigAt(I,n,on){return SIGV=='v2'?sigAt2(I,n,on):sigAt1(I,n)}
+const analyze=rows=>{const I=inds(rows),n=rows.length-1;return sigAt(I,n,SIGV=='v2'?MK0().on(+rows[n].d):null)};
+function agg(rows,r){if(r=='D')return rows;const m=new Map();for(const x of rows){const d=x.d;const k=r=='Y'?d.getFullYear():r=='M'?d.getFullYear()*100+d.getMonth():+new Date(d.getFullYear(),d.getMonth(),d.getDate()-((d.getDay()+6)%7));let g=m.get(k);if(!g){g={d:x.d,c:0,v:0};m.set(k,g)}g.c=x.c;g.d=x.d;g.v+=x.v}return[...m.values()]}
+function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gen(seed){const r=rng(seed);let p=20+r()*180,tr=0;const d=new Date(),days=[];d.setHours(0,0,0,0);while(days.length<780){if(d.getDay()!=0&&d.getDay()!=6)days.push(new Date(d));d.setDate(d.getDate()-1)}days.reverse();const vo=.012+r()*.014;return days.map(dt=>{tr=tr*.97+(r()-.5)*.004;p*=1+tr+(r()-.5)*2*vo;return{d:dt,c:+p.toFixed(2),v:Math.round((.5+r())*1e6*(r()>.95?3:1))}})}
+function loadDemo(){const N=['טבע','נייס','בנק לאומי','בנק הפועלים','דיסקונט','מזרחי טפחות','אלביט מערכות','איי.סי.אל','בזק','שטראוס','עזריאלי','פוקס','אמות','דלק קבוצה','שיכון ובינוי','נובה'];real=false;data={};N.forEach((n,i)=>data[n]={pe:8+(i*7)%23,rows:gen(100+i*37)});$('src').textContent='נתוני הדגמה (לא אמיתיים). נתונים אמיתיים נטענים אוטומטית כשהסורק נפתח דרך http://localhost:8765/';init()}
+function loadReal(D){real=true;FX=D.fx>0?+D.fx:null;data={};for(const k in D.stocks){const q=D.stocks[k];if(q.rows.length<30)continue;data[k]={sym:q.sym,pe:q.pe,fin:q.fin,rows:q.rows.map(r=>{const t=r[0].split('-');return{d:new Date(+t[0],+t[1]-1,+t[2]),c:r[1],v:r[2]}})}}$('src').textContent='נתונים אמיתיים · עודכן '+D.updated.replace('T',' ').slice(0,16);init();setTimeout(peCheck,0)}
+function init(){mkv++;for(const k in data)data[k].a=null;sel=Object.keys(data)[0];buildCtl();renderList();draw()}
+function A(k){const s=data[k];return s.a||(s.a=analyze(s.rows))}
+function buildCtl(){
+ $('params').innerHTML='<span class="sub" style="margin:0;align-self:center">פרמטרים:</span>';
+ {const sb=$('svbar');sb.innerHTML='<span class="sub" style="margin:0;align-self:center">גרסת איתות:</span>';
+ [['v1','מקורי (v1)'],['v2','משופר (v2)']].forEach(([v,t])=>{const b=document.createElement('button');b.textContent=t;b.className=SIGV==v?'on':'';b.onclick=()=>{SIGV=v;try{localStorage.setItem('sv',SIGV)}catch(e){}for(const s in data)data[s].a=null;mkv++;buildCtl();renderList();draw()};sb.append(b)})}
+ const FLs=SIGV=='v2'?PV2:P,NMs=SIGV=='v2'?MN2:PN;
+ for(const k in NMs){const b=document.createElement('button');b.textContent=NMs[k];b.className=FLs[k]?'on':'';b.onclick=()=>{FLs[k]=!FLs[k];for(const s in data)data[s].a=null;buildCtl();renderList();draw()};$('params').append(b)}
+ $('flt').innerHTML='';[['all','הכל'],['קנייה','קנייה'],['מכירה','מכירה'],['המתנה','המתנה'],['mine','התיק שלי']].forEach(([k,t])=>{const b=document.createElement('button');b.textContent=t;b.className=flt==k?'on':'';b.onclick=()=>{flt=k;buildCtl();renderList()};$('flt').append(b)});
+ $('res').innerHTML='';RES.forEach(([k,t])=>{const b=document.createElement('button');b.textContent=t;b.className=res==k?'on':'';b.onclick=()=>{res=k;hov=-1;buildCtl();draw()};$('res').append(b)});
+ $('ovl').innerHTML='';[['ma20','ממוצע 20'],['ma50','ממוצע 50'],['vol','נפח'],['mk','סימוני איתות'],['rsi','RSI'],['macd','MACD'],['cmp','השוואה למדד']].forEach(([k,t])=>{const b=document.createElement('button');b.textContent=t;b.className=ov[k]?'on':'';b.onclick=()=>{ov[k]=!ov[k];buildCtl();draw()};$('ovl').append(b)});
+ [['line','קו'],['area','שטח'],['bars','עמודות']].forEach(([k,t])=>{const b=document.createElement('button');b.textContent=t;b.className=ov.sty==k?'on':'';b.onclick=()=>{ov.sty=k;buildCtl();draw()};$('ovl').append(b)})}
+let sk='sc',sd=-1;
+const chgN=(r,n)=>r.length>n?r[r.length-1].c/r[r.length-1-n].c-1:null,pc=v=>v==null?'–':(v*100).toFixed(1)+'%',pcls=v=>v==null?'':v>=0?'up':'dn';
+function sval(k){const a=A(k),r=data[k].rows;switch(sk){case'name':return k;case'price':return a.price;case'chg':return a.chg;case'wk':return chgN(r,5);case'mo':return chgN(r,21);case'w':return real&&OFF.s[k]?OFF.s[k][1]:null;case'rsi':return a.R;case'pe':return data[k].pe>0?data[k].pe:null;default:return a.sc}}
+function renderList(){
+ const qv=$('q').value.trim().toLowerCase(),COLS=[['name','מניה'],['price','מחיר'],['chg','שינוי'],['wk','שבוע'],['mo','חודש'],['w','משקל %'],['rsi','RSI'],['pe','מכפיל'],['sc','איתות']];
+ $('lh').innerHTML='<tr>'+COLS.map(([k,t])=>`<th data-s="${k}">${t}${sk==k?(sd<0?' ▼':' ▲'):''}</th>`).join('')+'<th>דוחות</th></tr>';
+ const ks=Object.keys(data).filter(k=>(!qv||k.toLowerCase().includes(qv))&&(flt=='all'||(flt=='mine'?!!PF.pos[k]:A(k).act==flt)));
+ ks.sort((x,y)=>{const a=sval(x),b=sval(y);if(a==null&&b==null)return 0;if(a==null)return 1;if(b==null)return -1;return(typeof a=='string'?a.localeCompare(b,'he'):a-b)*sd});
+ const fl=k=>(f=>f.gc||f.rp)(FL(k))?' ⚠':'';
+ $('rows').innerHTML=ks.map(k=>{const a=A(k),r=data[k].rows,wk=chgN(r,5),mo=chgN(r,21),w=real&&OFF.s[k]?nf(OFF.s[k][1],2):'–';return`<tr class="r ${k==sel?'sel':''} ${a.act=='קנייה'?'rb':a.act=='מכירה'?'rs2':''}" data-k="${k}"><td>${k}</td><td class="num">${a.price.toFixed(2)}</td><td class="num ${pcls(a.chg)}">${pc(a.chg)}</td><td class="num ${pcls(wk)}">${pc(wk)}</td><td class="num ${pcls(mo)}">${pc(mo)}</td><td class="num">${w}</td><td class="num">${a.R==null?'–':a.R.toFixed(0)}</td><td class="num">${fpe(data[k].pe)}${peBad[k]?`<span class="dn" title="${peBad[k].why}"> ⚠</span>`:''}</td><td class="b ${a.act}">${a.act}</td><td><button class="rep" data-r="${k}">דוחות${fl(k)}</button></td></tr>`}).join('')||'<tr><td colspan="10">אין מניות בסינון הזה</td></tr>';
+ $('cards').innerHTML=ks.map(k=>{const a=A(k);return`<div class="card ${k==sel?'sel':''}" data-k="${k}"><div style="display:flex;justify-content:space-between"><b>${k}</b><span class="pill ${a.act}">${a.act}</span></div><div style="display:flex;justify-content:space-between"><span class="num"><b>${a.price.toFixed(2)}</b> ₪</span><span class="num ${pcls(a.chg)}">${pc(a.chg)}</span></div><div class="sub" style="margin:0">RSI ${a.R==null?'–':a.R.toFixed(0)} · מכפיל ${fpe(data[k].pe)}</div><div class="bar"><button class="rep" data-r="${k}">דוחות${fl(k)}</button><button class="cg" data-k="${k}">גרף</button></div></div>`}).join('')||'<p class="sub">אין מניות בסינון הזה</p>';
+ document.querySelectorAll('#lh th[data-s]').forEach(t=>t.onclick=()=>{const k=t.dataset.s;if(sk==k)sd=-sd;else{sk=k;sd=k=='name'?1:-1}renderList()});
+ document.querySelectorAll('.rep').forEach(b=>b.onclick=e=>{e.stopPropagation();showRep(b.dataset.r)});
+ document.querySelectorAll('.cg').forEach(b=>b.onclick=e=>{e.stopPropagation();sel=b.dataset.k;hov=-1;renderList();draw();$('ttl').scrollIntoView({behavior:'smooth'})});
+ document.querySelectorAll('tr.r,.card').forEach(r=>r.onclick=()=>{sel=r.dataset.k;hov=-1;renderList();draw()});
+ dash()}
+function dash(){
+ const ks=Object.keys(data);if(!ks.length)return;
+ const cnt={'קנייה':0,'מכירה':0,'המתנה':0};ks.forEach(k=>cnt[A(k).act]++);
+ const lastT=Math.max(...ks.map(k=>+data[k].rows[data[k].rows.length-1].d)),on=MK0().on(lastT);
+ const top=(act,dir)=>ks.filter(k=>A(k).act==act).sort((a,b)=>(A(b).sc-A(a).sc)*dir).slice(0,3).map(k=>`<div class="sub" style="margin:0">${k}</div>`).join('');
+ $('dash').innerHTML=`<div class="dcard" data-f="mine"><span class="sub">שווי תיק מדומה</span><b>${nf(equity(),0)} ₪</b></div>
+ <div class="dcard" data-f="קנייה"><span class="sub">איתות קנייה</span><b class="up">${cnt['קנייה']}</b>${top('קנייה',1)}</div>
+ <div class="dcard" data-f="מכירה"><span class="sub">איתות מכירה</span><b class="dn">${cnt['מכירה']}</b>${top('מכירה',-1)}</div>
+ <div class="dcard" data-f="all"><span class="sub">מצב השוק (מדד משקל-שווה)</span><b style="font-size:15px">${on==null?'אין מספיק נתונים':on?'מעל ממוצע 50: תומך':'מתחת לממוצע 50'}</b></div>`;
+ document.querySelectorAll('.dcard').forEach(d=>d.onclick=()=>{flt=d.dataset.f;buildCtl();renderList()})}
+function draw(){
+ const s=data[sel];if(!s)return;const a=A(sel),cs=getComputedStyle(document.documentElement),col=n=>cs.getPropertyValue(n).trim();
+ $('ttl').innerHTML=`${sel} <span class="${a.act}">· ${a.act}</span> <span class="sub" style="margin:0">מכפיל רווח: ${fpe(s.pe)}</span>`;
+ $('why').innerHTML='<ul>'+a.f.map(x=>`<li>${x[1]}</li>`).join('')+'</ul>';
+ const all=agg(s.rows,res),cl=all.map(x=>x.c),m20=sma(cl,20),m50=sma(cl,50),from=Math.max(0,all.length-LIM[res]);
+ view=all.slice(from);const c=view.map(x=>x.c),n=c.length,m2=m20.slice(from),m5=m50.slice(from);
+ const cv=$('cv');cv.style.height=(320+((ov.rsi?1:0)+(ov.macd?1:0))*100)+'px';const r=cv.getBoundingClientRect(),dpr=devicePixelRatio||1;cv.width=r.width*dpr;cv.height=r.height*dpr;
+ const x=cv.getContext('2d');x.scale(dpr,dpr);const W=r.width,H0=r.height,SUB=(ov.rsi?100:0)+(ov.macd?100:0),H=H0-SUB,pr=46,pt=10,pb=20,vh=ov.vol?H*.18:0,ch=H-pt-pb-vh-(vh?8:0);
+ const cmpOn=ov.cmp&&n>1,mkt0=MK0(),mvr=cmpOn?view.map(q=>mkt0.at(+q.d)):null,k0=c[0],S=cmpOn?c.map(v=>v/k0*100):c,m2s=cmpOn?m2.map(v=>v==null?null:v/k0*100):m2,m5s=cmpOn?m5.map(v=>v==null?null:v/k0*100):m5,Mv=cmpOn&&mvr[0]?mvr.map(v=>v==null?null:v/mvr[0]*100):null;
+ const vals=[...S,...(Mv||[]),...(ov.ma20?m2s:[]),...(ov.ma50?m5s:[])].filter(v=>v!=null),lo=Math.min(...vals),hi=Math.max(...vals),sp=(hi-lo)||1;
+ const px=i=>n<2?(W-pr)/2:i*(W-pr-6)/(n-1)+3,py=v=>pt+ch*(1-(v-lo)/sp);
+ x.font='11px Heebo,Arial';x.fillStyle=col('--mut');x.strokeStyle=col('--line');x.lineWidth=1;
+ for(let g=0;g<=3;g++){const v=lo+sp*g/3,y=py(v);x.beginPath();x.moveTo(0,y);x.lineTo(W-pr,y);x.stroke();x.fillText(v.toFixed(2),W-pr+4,y+4)}
+ const fd=d=>d.toLocaleDateString('he-IL',res=='Y'?{year:'numeric'}:res=='M'?{month:'2-digit',year:'numeric'}:{day:'2-digit',month:'2-digit',year:'numeric'});
+ {const T=Math.max(2,Math.min(6,Math.floor((W-pr)/78),n));x.textAlign='center';
+  for(let q=0;q<T;q++){const i=Math.round(q*(n-1)/(T-1)),xx=Math.min(W-pr-36,Math.max(36,px(i)));x.fillText(fd(view[i].d),xx,H0-5);x.beginPath();x.moveTo(px(i),H0-20);x.lineTo(px(i),H0-16);x.stroke()}
+  x.textAlign='left'}
+ if(vh){const mv=Math.max(...view.map(q=>q.v))||1;x.fillStyle=col('--line');view.forEach((q,i)=>{const h=vh*q.v/mv,bw=Math.max(1,(W-pr)/Math.max(n,1)*.6);x.fillRect(px(i)-bw/2,H-pb-h,bw,h)})}
+ const line=(arr,color,w)=>{x.beginPath();let st=false;arr.forEach((v,i)=>{if(v==null)return;st?x.lineTo(px(i),py(v)):x.moveTo(px(i),py(v));st=true});x.strokeStyle=color;x.lineWidth=w;x.stroke()};
+ if(ov.sty=='area'&&n>1){const g=x.createLinearGradient(0,pt,0,pt+ch);g.addColorStop(0,col('--acc')+'33');g.addColorStop(1,col('--acc')+'00');x.beginPath();S.forEach((v,i)=>i?x.lineTo(px(i),py(v)):x.moveTo(px(i),py(v)));x.lineTo(px(n-1),pt+ch);x.lineTo(px(0),pt+ch);x.fillStyle=g;x.fill()}
+ if(ov.sty=='bars'){const bw=Math.max(1,(W-pr)/Math.max(n,1)*.55);x.fillStyle=col('--acc')+'88';S.forEach((v,i)=>x.fillRect(px(i)-bw/2,py(v),bw,pt+ch-py(v)))}
+ if(ov.ma20)line(m2s,col('--hold'),1.4);if(ov.ma50)line(m5s,col('--sell'),1.4);
+ if(Mv){x.setLineDash([6,4]);line(Mv,col('--mut'),2);x.setLineDash([])}
+ if(ov.sty!='bars')line(S,col('--acc'),2);
+ if(ov.mk&&n>1){const I2=inds(all),ac=all.map((q,i)=>sigAt(I2,i,SIGV=='v2'?mkt0.on(+q.d):null).act);
+  const tri=(xx,yy,up,color)=>{x.fillStyle=color;x.beginPath();x.moveTo(xx,yy);x.lineTo(xx-5,yy+(up?9:-9));x.lineTo(xx+5,yy+(up?9:-9));x.closePath();x.fill()};
+  for(let i=Math.max(1,from);i<all.length;i++){const j=i-from;if(ac[i]=='קנייה'&&ac[i-1]!='קנייה')tri(px(j),py(S[j])+6,true,col('--buy'));else if(ac[i]=='מכירה'&&ac[i-1]!='מכירה')tri(px(j),py(S[j])-6,false,col('--sell'))}}
+ PF.log.filter(l=>l.k==sel).forEach(l=>{const tt=+new Date(l.t);let j=-1;for(let i=0;i<n;i++){if(+view[i].d<=tt)j=i;else break}if(j>=0){x.beginPath();x.arc(px(j),py(S[j]),5,0,7);x.fillStyle=l.side=='buy'?col('--buy'):col('--sell');x.fill();x.strokeStyle=col('--card');x.lineWidth=1.5;x.stroke();x.lineWidth=1}});
+ const tw=s=>{const m=x.measureText(s);return m&&m.width?m.width:s.length*6.5};
+ let y0=H;const sub=(t,fn)=>{x.fillStyle=col('--mut');x.textAlign='left';x.fillText(t,0,y0+10);fn(y0+16,70);y0+=100};
+ if(ov.rsi){const rv=rsi(cl,14).slice(from);sub('RSI',(top,hh)=>{const ry=v=>top+hh*(1-v/100);x.strokeStyle=col('--line');[30,70].forEach(l=>{x.beginPath();x.moveTo(0,ry(l));x.lineTo(W-pr,ry(l));x.stroke();x.fillStyle=col('--mut');x.fillText(l,W-pr+4,ry(l)+4)});x.beginPath();let st=false;rv.forEach((v,i)=>{if(v==null)return;st?x.lineTo(px(i),ry(v)):x.moveTo(px(i),ry(v));st=true});x.strokeStyle=col('--acc');x.lineWidth=1.6;x.stroke();x.lineWidth=1})}
+ if(ov.macd){const M=macd(cl),ml=M.m.slice(from),sl=M.s.slice(from),hs=ml.map((v,i)=>v-sl[i]),mx=Math.max(1e-9,...hs.map(Math.abs),...ml.map(Math.abs),...sl.map(Math.abs));sub('MACD (12,26,9)',(top,hh)=>{const my=v=>top+hh/2*(1-v/mx),z=my(0);
+  const ly=top-6;let lx=tw('MACD (12,26,9)')+22;const item=(c0,dash,label)=>{x.strokeStyle=c0;x.lineWidth=2;x.setLineDash(dash?[4,3]:[]);x.beginPath();x.moveTo(lx,ly-3);x.lineTo(lx+16,ly-3);x.stroke();x.setLineDash([]);x.lineWidth=1;x.fillStyle=col('--mut');x.textAlign='left';x.fillText(label,lx+20,ly);lx+=20+tw(label)+14};
+  item(col('--acc'),false,'MACD line');item(col('--hold'),false,'Signal line');item(col('--mut'),true,'Baseline (0)');
+  x.strokeStyle=col('--mut');x.setLineDash([4,3]);x.beginPath();x.moveTo(0,z);x.lineTo(W-pr,z);x.stroke();x.setLineDash([]);x.fillStyle=col('--mut');x.textAlign='left';x.fillText('0',W-pr+4,z+4);const bw=Math.max(1,(W-pr)/Math.max(n,1)*.6);hs.forEach((v,i)=>{x.fillStyle=v>=0?col('--buy'):col('--sell');x.fillRect(px(i)-bw/2,Math.min(z,my(v)),bw,Math.abs(my(v)-z))});[[ml,col('--acc')],[sl,col('--hold')]].forEach(([arr,c0])=>{x.beginPath();arr.forEach((v,i)=>i?x.lineTo(px(i),my(v)):x.moveTo(px(i),my(v)));x.strokeStyle=c0;x.lineWidth=1.2;x.stroke();x.lineWidth=1})})}
+ if(hov>=0&&hov<n){x.strokeStyle=col('--mut');x.beginPath();x.moveTo(px(hov),pt);x.lineTo(px(hov),pt+ch);x.stroke();x.fillStyle=col('--acc');x.beginPath();x.arc(px(hov),py(c[hov]),4,0,7);x.fill();$('tip').textContent=view[hov].d.toLocaleDateString('he-IL')+'  '+c[hov].toFixed(2)}
+ else $('tip').textContent=n+' נקודות · '+RES.find(q=>q[0]==res)[1]+(cmpOn?' · מנורמל ל-100 מול מדד השוק':'');
+}
+$('cv').addEventListener('pointermove',e=>{const r=$('cv').getBoundingClientRect(),n=view.length,i=n<2?0:Math.round((e.clientX-r.left-3)/(r.width-52)*(n-1));hov=Math.max(0,Math.min(n-1,i));draw()});
+$('cv').addEventListener('pointerleave',()=>{hov=-1;draw()});
+let rfFailAt=0;
+async function fullRefresh(){
+ if(hosted()||!isHttp()||rfBusy||optBusy||$('dlg').open)return;
+ rfBusy=true;const prev=sel,old=$('src').textContent;$('src').textContent='מושך נתונים עדכניים… (בפעם הראשונה עד כ-10 דקות, בהמשך מהר)';
+ try{
+  const r=await fetch('/refresh',{method:'POST'}),j=await r.json();if(!j.ok)throw Error(j.error||'שגיאה לא ידועה');
+  await new Promise((ok,no)=>{const s=document.createElement('script');s.src='data.js?t='+Date.now();s.charset='utf-8';s.onload=ok;s.onerror=()=>no(Error('טעינת data.js נכשלה'));document.head.append(s)});
+  loadReal(window.TASE_DATA);if(data[prev]){sel=prev;renderList();draw()}
+ }catch(e){rfFailAt=Date.now();$('src').textContent=old+' · המשיכה האוטומטית נכשלה: '+e.message}
+ rfBusy=false}
+const stale=()=>{const D=window.TASE_DATA;return!D||!D.full||Date.now()-new Date(D.full)>6*36e5};
+setInterval(()=>{if(Date.now()-rfFailAt>6e5&&stale())fullRefresh()},60000);
+const FL=k=>{try{return JSON.parse(localStorage.getItem('fl:'+k)||'{}')}catch(e){return{}}};
+const setFL=(k,o)=>{try{localStorage.setItem('fl:'+k,JSON.stringify(o))}catch(e){}};
+function openD(html){$('dbody').innerHTML=html;$('dlg').showModal()}
+$('dx').onclick=()=>$('dlg').close();$('dlg').addEventListener('click',e=>{if(e.target==$('dlg'))$('dlg').close()});
+$('hlp').onclick=()=>openD(`<h2>הסברים</h2>
+<h3>RSI (מדד עוצמה יחסית)</h3><p>מספר בין 0 ל-100 שמודד כמה חזקות עליות המחיר ב-14 הימים האחרונים לעומת הירידות. מעל 70 נחשב "קנייה ביתר" (המניה אולי התייקרה מהר מדי), מתחת ל-30 "מכירת יתר" (אולי נפלה יותר מדי). בין 30 ל-70 נייטרלי.</p>
+<h3>MACD</h3><p>ההפרש בין ממוצע נע מהיר (12 ימים) לאיטי (26 ימים), מול "קו איתות" (ממוצע של 9 ימים של ההפרש). כש-MACD חוצה מעל קו האיתות זה סימן למומנטום עולה, וכשהוא מתחת, למומנטום יורד.</p>
+<h3>מכפיל רווח (P/E)</h3><p>מחיר המניה חלקי הרווח למניה ב-12 החודשים האחרונים: כמה שקלים משלמים על כל שקל רווח שנתי. מכפיל נמוך יכול להצביע על מניה זולה, וגבוה על ציפיות לצמיחה, אבל ההשוואה הנכונה היא בתוך אותו ענף. חברה בהפסד מוצגת עם מקף.</p>
+<h3>שיטת ההמלצה (קנייה / המתנה / מכירה)</h3><p>כל פרמטר פעיל נותן נקודות:</p><ul>
+<li>ממוצעים נעים: מחיר מעל ממוצע 50 יום +1, מתחת -1. ממוצע 50 מעל ממוצע 200 (צלב זהב) +1, מתחת (צלב מוות) -1.</li>
+<li>RSI: מתחת ל-30 +2, מעל 70 -2, אחרת 0.</li>
+<li>MACD: מעל קו האיתות +1, מתחת -1.</li>
+<li>נפח: נפח היום מעל פי 1.5 מהממוצע ל-20 יום: +1 אם המחיר עלה, -1 אם ירד. אחרת 0.</li></ul>
+<p>סכום הנקודות מושווה לסף של חצי מהציון המקסימלי האפשרי לפי הפרמטרים שמסומנים (עם כולם: מקסימום 6 וסף 3). סכום שווה לסף או גבוה ממנו = <b>קנייה</b>, שווה למינוס הסף או נמוך ממנו = <b>מכירה</b>, אחרת <b>המתנה</b>. מכפיל הרווח מוצג למידע בלבד ואינו משפיע על האיתות.</p>
+<h3>מגמת השוק</h3><p>תמונה כללית של השוק, לא מדד רשמי. האפליקציה בונה מדד משלה מכל המניות ברשימה (הממוצע של השינוי היומי של כולן, במשקל שווה לכל מניה) ובודקת אם הוא <b>מעל</b> או <b>מתחת</b> לממוצע הנע של 50 הימים האחרונים שלו. מעל הממוצע נחשב "תומך" (השוק בעלייה), ומתחתיו שוק חלש.</p>
+<p>הנתון מוצג בכרטיס "מצב השוק" בלוח הבקרה, ובאיתות המשופר (v2) הוא מסנן: כשהשוק מתחת לממוצע 50, לא נכנסים לקניות חדשות. המדד הזה שונה מ-ת"א-125 הרשמי, כי הוא מחושב במשקל שווה ולא לפי שווי שוק, והוא מבוסס רק על המניות שבאפליקציה.</p>
+<h3>משקל במדד (%)</h3><p>כמה המניה משפיעה על מדד ת"א-125: חלקה בשווי השוק של המדד (מותאם לחלק הצף בידי הציבור), לפי קובץ הרכב המדד הרשמי של הבורסה. כל המשקלים מסתכמים ב-100%. מניה עם משקל 5% תזיז את המדד בערך פי 5 ממניה עם משקל 1%, באותו שינוי באחוזים.</p>
+<p>העמודה מופיעה בטבלה רק כשהנתונים אמיתיים. זו תמונת מצב נכון לתאריך הקובץ (19/11/2026), ולא נתון שמתעדכן. הבורסה מעדכנת את הרכב המדד ואת המשקלים מדי תקופה, ולכן כדאי להעלות קובץ חדש מדי פעם.</p>
+<h3>איתות משופר (v2)</h3><p>גרסה ניסיונית שמחליפה את שיטת הניקוד בכללים היררכיים, כדי להפחית סתירות ורעש:</p><ul>
+<li><b>קנייה</b> רק כשכל התנאים הפעילים מתקיימים: מגמת עלייה במניה (מחיר מעל ממוצע 50, שמעל ממוצע 200), MACD מעל קו האיתות 3 ימים ברציפות (פחות החלפות יום-יומיות), RSI לא חם מדי (מתחת ל-75; RSI משמש כמסנן ולא כנקודות היפוך), השוק כולו במגמה (מדד משקל-שווה של המניות מעל ממוצע 50 שלו) ותנודתיות לא בזינוק (פחות מפי 2.5 מהרגיל).</li>
+<li><b>מכירה</b> כשהמחיר מתחת לממוצע 50 יומיים ברציפות, או בצלב מוות.</li>
+<li><b>דירוג</b> בין מניות לקנייה: לפי תשואה ב-60 הימים האחרונים (מומנטום), במקום שוויון מקרי.</li></ul>
+<p class="sub">v2 עדיין לא הוכחה כטובה יותר. יש לבדוק אותה באימון, בניתוח תרומת מדדים, ב-Walk-Forward ובסימולציה חיה.</p>
+<p class="sub">זהו כלי עזר טכני מבוסס היסטוריית מחירים בלבד ואינו ייעוץ השקעות.</p>`);
+function showRep(k){
+ const s=data[k],f=s.fin,fl=FL(k);
+ const m=v=>v==null?'–':Math.abs(v)>=1e6?(v/1e6).toLocaleString('he-IL',{maximumFractionDigits:1})+' מ׳':v.toLocaleString('he-IL');
+ const tb=(t,r)=>`<h3>${t}</h3>`+(r&&r.length?`<div class="tbl"><table><thead><tr><th>תאריך דוח</th><th>הכנסות</th><th>רווח נקי</th><th>רווח למניה</th></tr></thead><tbody>${r.map(x=>`<tr><td>${x[0]}</td><td class="num">${m(x[1])}</td><td class="num">${m(x[2])}</td><td class="num">${x[3]==null?'–':(+x[3]).toFixed(2)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="sub">אין נתונים זמינים.</p>');
+ const g='https://www.google.com/search?q='+encodeURIComponent('site:maya.tase.co.il '+k+' דוחות כספיים');
+ openD(`<h2>${k} · דוחות כספיים</h2>`+(f?tb('רבעוניים (4 רבעונים אחרונים)',f.q)+tb('שנתיים (3 שנים אחרונות)',f.a)+'<p class="sub">הסכומים במטבע הדיווח של החברה (חלקן מדווחות בדולר), במיליונים (מ׳).</p>':'<p class="sub">אין נתוני דוחות (נתוני הדגמה, או שהמשיכה האוטומטית לא הביאה אותם).</p>')+
+ `<h3>הערת עסק חי ועסקאות בעלי עניין</h3><p class="sub">מידע זה מופיע בדוחות המלאים (חוות דעת רואה החשבון והביאורים) ואינו נמשך אוטומטית. לאחר בדיקה בדוחות אפשר לסמן כאן:</p>
+ <label class="fl"><input type="checkbox" id="fgc" ${fl.gc?'checked':''}> יש הערת עסק חי</label>
+ <label class="fl"><input type="checkbox" id="frp" ${fl.rp?'checked':''}> יש עסקאות בעלי עניין מהותיות</label>
+ <p><a href="${g}" target="_blank" rel="noopener">חיפוש הדוחות המלאים של ${k} במאיה (אתר הבורסה)</a></p>`);
+ const sv=()=>{setFL(k,{gc:$('fgc').checked,rp:$('frp').checked});renderList()};$('fgc').onchange=sv;$('frp').onchange=sv}
+const PK='pf1',FEE=0.001;
+let PF=(()=>{try{return JSON.parse(localStorage.getItem(PK))}catch(e){return null}})()||{cash:100000,start:100000,pos:{},log:[]};
+let pfSrv=false;
+const isHttp=()=>/^https?:$/.test(location.protocol)&&/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+const hosted=()=>/^https?:$/.test(location.protocol)&&!isHttp();
+const savePF=()=>{try{localStorage.setItem(PK,JSON.stringify(PF))}catch(e){}
+ if(isHttp())fetch('/portfolio',{method:'POST',body:JSON.stringify(PF)}).then(r=>r.json()).then(j=>{pfSrv=!!j.ok}).catch(()=>{pfSrv=false})};
+const okPF=j=>j&&typeof j.cash=='number'&&typeof j.start=='number'&&j.pos&&typeof j.pos=='object'&&Array.isArray(j.log);
+async function syncPF(){
+ if(!isHttp())return;
+ try{const j=await(await fetch('/portfolio')).json();
+  if(okPF(j)){PF=j;try{localStorage.setItem(PK,JSON.stringify(PF))}catch(e){}pfSrv=true;renderList();stLbl()}else savePF()}catch(e){}}
+function exportPF(){const b=new Blob([JSON.stringify(PF,null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='portfolio-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function importPF(){const i=document.createElement('input');i.type='file';i.accept='.json';i.onchange=()=>{const f=i.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);if(!okPF(j))throw Error('מבנה קובץ לא תקין');if(!confirm('לשחזר את התיק מהקובץ? התיק הנוכחי יוחלף.'))return;PF=j;savePF();renderList();openPF('התיק שוחזר מהגיבוי.')}catch(e){alert('שחזור נכשל: '+e.message)}};r.readAsText(f)};i.click()}
+const lastP=k=>{const r=data[k]&&data[k].rows;return r&&r.length?r[r.length-1].c:null};
+const nf=(v,d=2)=>v.toLocaleString('he-IL',{minimumFractionDigits:d,maximumFractionDigits:d});
+const demoNote=()=>real?'':'<p class="dn">שים לב: הנתונים כרגע הם נתוני הדגמה, והמחירים אינם אמיתיים.</p>';
+function trade(k,side,q,pr,why){
+ const p=pr||lastP(k);q=Math.floor(q);if(!p||!(q>=1))return'כמות לא תקינה';
+ const val=p*q,fee=val*FEE,pos=PF.pos[k]||{q:0,avg:0};
+ if(side=='buy'){if(val+fee>PF.cash)return'אין מספיק מזומן בקופה';const nq=pos.q+q;if(!pos.q)pos.d=new Date().toISOString().slice(0,10);pos.avg=(pos.q*pos.avg+val+fee)/nq;pos.q=nq;PF.cash-=val+fee;PF.pos[k]=pos}
+ else{if(q>pos.q)return'אין מספיק מניות למכירה';pos.q-=q;PF.cash+=val-fee;if(pos.q==0){delete PF.pos[k];(PF.sold=PF.sold||{})[k]=new Date().toISOString().slice(0,10)}else PF.pos[k]=pos}
+ PF.log.unshift({t:new Date().toISOString(),k,side,q,p,fee,why});PF.log=PF.log.slice(0,200);savePF();return null}
+function openTrade(k,side){
+ const p=lastP(k),a=A(k),held=(PF.pos[k]||{q:0}).q,buy=side=='buy';
+ openD(`<h2>${buy?'קנייה':'מכירה'} מדומה · ${k}</h2>${demoNote()}
+ <p>מחיר אחרון: <b>${nf(p)} ₪</b> · איתות נוכחי: <b class="${a.act}">${a.act}</b></p>
+ <p>מזומן בקופה: <b>${nf(PF.cash)} ₪</b> · מניות בתיק: <b>${held}</b></p>
+ <label>כמות: <input id="tq" type="number" min="1" step="1" value="10" style="width:100px;font:inherit"></label>
+ <p id="tp" class="sub"></p><p id="te" class="dn"></p>
+ <div class="bar"><button id="tok" class="on">אשר ${buy?'קנייה':'מכירה'}</button></div>
+ <p class="sub">עמלה מדומה: ${FEE*100}% לכל פעולה. הביצוע במחיר המוצג בחלון (קבוע מרגע פתיחתו). אין מכירה בחסר.</p>`);
+ const up=()=>{const q=Math.floor($('tq').value)||0,v=p*q,fe=v*FEE;$('tp').innerHTML=`סכום ${buy?'הקנייה':'המכירה'}: <b>${nf(v)} ₪</b><br>עמלה: <b>${nf(fe)} ₪</b><br>${buy?'סה״כ לתשלום':'סה״כ לקבלה'}: <b>${nf(buy?v+fe:v-fe)} ₪</b>`};up();$('tq').oninput=up;
+ $('tok').onclick=()=>{const e=trade(k,side,$('tq').value,p);if(e){$('te').textContent=e;return}const l=PF.log[0];renderList();openPF((l.side=='buy'?'קנייה':'מכירה')+' בוצעה: '+l.q+' × '+k+' · סכום '+nf(l.q*l.p)+' ₪ · עמלה '+nf(l.fee)+' ₪')}}
+
+function pfSeries(){
+ const lg=[...PF.log].reverse();if(!lg.length)return null;
+ const t0=new Date(lg[0].t);t0.setHours(0,0,0,0);const ks=Object.keys(data),ds=new Set();
+ ks.forEach(k=>data[k].rows.forEach(r=>{if(+r.d>=+t0)ds.add(+r.d)}));
+ const D=[...ds].sort((a,b)=>a-b);if(D.length<2)return null;
+ let cash=PF.start,li=0;const pos={},px={},ix={},out=[];ks.forEach(k=>ix[k]=0);
+ for(const t of D){
+  ks.forEach(k=>{const r=data[k].rows;while(ix[k]<r.length&&+r[ix[k]].d<=t){px[k]=r[ix[k]].c;ix[k]++}});
+  while(li<lg.length&&+new Date(lg[li].t)<=t+864e5-1){const l=lg[li++],v=l.q*l.p;if(l.side=='buy'){cash-=v+l.fee;pos[l.k]=(pos[l.k]||0)+l.q}else{cash+=v-l.fee;pos[l.k]=(pos[l.k]||0)-l.q}}
+  const vv=Object.keys(pos).reduce((a,k)=>a+(pos[k]>0&&px[k]!=null?pos[k]*px[k]:0),0);out.push({t,e:cash+vv,x:vv/(cash+vv)})}
+ return out}
+function pfCharts(){
+ let h='';const s=pfSeries();
+ if(s){const mk=MK0(),i0=mk.at(s[0].t),ae=s.reduce((a,p)=>a+p.x,0)/s.length,bm=s.map(p=>{const v=mk.at(p.t);return i0&&v?PF.start*(1-ae+ae*v/i0):PF.start}),eq=s.map(p=>p.e);
+  const N=eq.length,lo=Math.min(...eq,...bm),hi=Math.max(...eq,...bm),sp=hi-lo||1,pl=a=>a.map((v,i)=>(i/(N-1)*600).toFixed(1)+','+(140-(v-lo)/sp*130).toFixed(1)).join(' ');
+  h+=`<h3>שווי התיק לאורך זמן</h3><svg viewBox="0 0 600 150" preserveAspectRatio="none" style="width:100%;height:140px;direction:ltr" role="img" aria-label="שווי התיק מול בנצ׳מרק"><polyline fill="none" stroke="var(--hold)" stroke-width="1.6" stroke-dasharray="5 3" points="${pl(bm)}"/><polyline fill="none" stroke="var(--acc)" stroke-width="2" points="${pl(eq)}"/></svg><p class="sub">כחול: שווי התיק · מקווקו: בנצ׳מרק מותאם לחשיפה הממוצעת (${nf(ae*100,0)}%) · ${nf(eq[0],0)} ← ${nf(eq[N-1],0)} ₪</p>`}
+ else h+='<p class="sub">גרף שווי התיק יופיע כשיש לפחות יומיים של היסטוריה מאז העסקה הראשונה.</p>';
+ let sl=Object.keys(PF.pos).map(k=>[k,PF.pos[k].q*(lastP(k)||PF.pos[k].avg)]);sl.push(['מזומן',PF.cash]);sl.sort((a,b)=>b[1]-a[1]);
+ const tot=sl.reduce((a,x)=>a+x[1],0),top=sl.slice(0,6),rest=sl.slice(6).reduce((a,x)=>a+x[1],0);if(rest>0)top.push(['אחרות',rest]);
+ let off=0;const C=251.33,op=[1,.8,.62,.48,.36,.26,.18];
+ const arcs=top.map((x,i)=>{const f=x[1]/tot,a=`<circle r="40" cx="60" cy="60" fill="none" stroke="var(--acc)" stroke-opacity="${op[i]}" stroke-width="22" stroke-dasharray="${(f*C).toFixed(1)} ${C}" stroke-dashoffset="${(-off*C).toFixed(1)}" transform="rotate(-90 60 60)"/>`;off+=f;return a}).join('');
+ h+=`<h3>חלוקת התיק</h3><div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><svg width="120" height="120" viewBox="0 0 120 120" role="img" aria-label="חלוקת התיק">${arcs}</svg><div>${top.map((x,i)=>`<div class="sub" style="margin:0"><b style="color:var(--acc);opacity:${op[i]}">■</b> ${x[0]} ${nf(x[1]/tot*100,0)}%</div>`).join('')}</div></div>`;
+ return h}
+
+const TAXR=.25,SURT=721560;
+const surtax=(other,g)=>{const A=Math.max(0,other+g-SURT);return A*.03+Math.min(A,Math.max(g,0))*.02};
+function taxYears(){
+ const avg={},qty={},yr={};
+ for(const l of [...PF.log].reverse()){const y=new Date(l.t).getFullYear();
+  if(l.side=='buy'){const q0=qty[l.k]||0,nq=q0+l.q;avg[l.k]=(q0*(avg[l.k]||0)+l.q*l.p+l.fee)/nq;qty[l.k]=nq}
+  else{yr[y]=(yr[y]||0)+l.q*l.p-l.fee-l.q*(avg[l.k]||l.p);qty[l.k]=Math.max(0,(qty[l.k]||0)-l.q);if(!qty[l.k])avg[l.k]=0}}
+ return yr}
+function taxCalc(){
+ const yr=taxYears(),other=(PF.tax&&PF.tax.other)||0;let carry=0,tot=0,totTax=0;
+ const rows=Object.keys(yr).sort().map(y=>{const g=yr[y],net=g+carry;let tx=0;if(net>0){tx=net*TAXR+surtax(other,net);carry=0}else carry=net;tot+=g;totTax+=tx;return{y,g,carry,tx}});
+ let un=0;for(const k in PF.pos){const q=PF.pos[k];un+=((lastP(k)||q.avg)-q.avg)*q.q}
+ return{rows,tot,totTax,un,unTax:un>0?un*TAXR:0,other}}
+function taxHTML(){
+ const T=taxCalc(),eq=equity();
+ const body=T.rows.length?`<div class="tbl"><table><thead><tr><th>שנה</th><th>רווח (הפסד) ממומש נטו ₪</th><th>מס מוערך ₪</th><th>אחרי מס ₪</th></tr></thead><tbody>${T.rows.map(r=>`<tr><td>${r.y}</td><td class="num ${r.g>=0?'up':'dn'}">${nf(r.g,0)}</td><td class="num">${nf(r.tx,0)}</td><td class="num">${nf(r.g-r.tx,0)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="sub">אין עדיין מכירות, ולכן אין רווח ממומש ואין מס מוערך.</p>';
+ const afterReal=(eq-T.totTax-PF.start)/PF.start*100,afterAll=(eq-T.totTax-T.unTax-PF.start)/PF.start*100,pre=(eq-PF.start)/PF.start*100;
+ return`<h3>הערכת מס (להמחשה בלבד)</h3>
+ <p class="sub">פרופיל: תושב ישראל, נשוי, ילדה מתחת לגיל 18. מצב משפחתי ונקודות זיכוי משפיעים על מס ההכנסה מעבודה, ולא על שיעור מס רווח ההון (${TAXR*100}%). ההערכה לא מפחיתה נקודות זיכוי מרווחי ההון. האפשרות לנצל אותן תלויה בהכנסתך ויש לבדוק זאת עם יועץ מס.</p>
+ ${body}
+ <label class="fl">הכנסה חייבת שנתית אחרת, לפני רווחי ההון (₪, לחישוב מס יסף): <input id="tx_o" type="number" min="0" step="1000" value="${T.other}" style="width:120px;font:inherit"></label>
+ <p>תשואה לפני מס: <b>${nf(pre,1)}%</b> · אחרי מס על הרווחים הממומשים: <b>${nf(afterReal,1)}%</b> · אם כל ההחזקות היו נמכרות היום: <b>${nf(afterAll,1)}%</b> (מס מוערך על רווח לא ממומש: ${nf(T.unTax,0)} ₪)</p>
+ <p class="sub">הערכה מפושטת: ${TAXR*100}% על הרווח הנומינלי נטו (בלי התאמה לאינפלציה, שמפחיתה את המס בפועל), קיזוז הפסדים בין שנים בהנחה שהוגש דוח, מס יסף לפי סף ${nf(SURT,0)} ₪ (3% על ההכנסה שמעל הסף ועוד 2% על חלק ההכנסה ההונית שמעליו). אין דיבידנדים, עמלות מס, בעלות מהותית או ניכוי מס זר. לדוח המס הקובע יש להשתמש בדוחות הברוקר וביועץ מס.</p>`}
+function openPF(msg){
+ let tot=PF.cash;const rows=Object.keys(PF.pos).map(k=>{const q=PF.pos[k],p=lastP(k)||q.avg,v=p*q.q;tot+=v;return`<tr><td>${k}</td><td class="num">${q.q}</td><td class="num">${nf(q.avg)}</td><td class="num">${nf(p)}</td><td class="num">${nf(v)}</td><td class="num ${p>=q.avg?'up':'dn'}">${nf((p/q.avg-1)*100,1)}%</td></tr>`}).join('');
+ const rt=(tot/PF.start-1)*100;
+ openD(`<h2>תיק מדומה</h2>${msg?`<p class="up b">${msg}</p>`:''}${demoNote()}
+ <p>שווי כולל: <b>${nf(tot)} ₪</b> (<span class="${rt>=0?'up':'dn'}">${nf(rt,1)}%</span> מההון ההתחלתי ${nf(PF.start,0)} ₪) · מזומן: <b>${nf(PF.cash)} ₪</b></p>
+ ${pfCharts()}${taxHTML()}<h3>החזקות</h3>${rows?`<div class="tbl"><table><thead><tr><th>מניה</th><th>כמות</th><th>עלות ממוצעת</th><th>מחיר</th><th>שווי</th><th>רווח/הפסד</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<p class="sub">אין החזקות.</p>'}
+ <h3>היסטוריית פעולות (אחרונות)</h3>${PF.log.length?`<div class="tbl"><table><thead><tr><th>תאריך</th><th>מניה</th><th>סוג</th><th>כמות × מחיר</th><th>סכום עסקה</th><th>עמלה</th><th>סיבה</th></tr></thead><tbody>${PF.log.slice(0,15).map(l=>`<tr><td>${new Date(l.t).toLocaleString('he-IL')}</td><td>${l.k}</td><td class="${l.side=='buy'?'up':'dn'}">${l.side=='buy'?'קנייה':'מכירה'}</td><td class="num">${l.q} × ${nf(l.p)}</td><td class="num">${nf(l.q*l.p)}</td><td class="num">${nf(l.fee)}</td><td>${l.why||'ידני'}</td></tr>`).join('')}</tbody></table></div>`:'<p class="sub">אין פעולות עדיין.</p>'}
+ <h3>גיבוי</h3><p class="sub">${pfSrv?'התיק נשמר אוטומטית גם בקובץ portfolio.json בתיקיית האפליקציה.':'שמירה אוטומטית לקובץ זמינה רק כשהסורק פתוח דרך http://localhost:8765/ והשרת רץ.'}</p>
+ <div class="bar"><button id="pex">ייצוא גיבוי לקובץ</button><button id="pim">שחזור מקובץ</button><button id="prs">איפוס תיק (100,000 ₪)</button></div>`);
+ $('pex').onclick=exportPF;$('pim').onclick=importPF;
+ if($('tx_o'))$('tx_o').onchange=()=>{PF.tax={other:Math.max(0,parseFloat($('tx_o').value)||0)};savePF();openPF()};
+ $('prs').onclick=()=>{if(confirm('לאפס את התיק המדומה ולמחוק את ההיסטוריה?')){PF={cash:100000,start:100000,pos:{},log:[]};savePF();renderList();openPF()}}}
+$('q').oninput=()=>renderList();
+$('pf').onclick=()=>openPF();
+const PE_TOL=.3;
+function peCheck(){
+ const bad={};
+ if(real&&FX>0)for(const k in data){const s=data[k],q=s.fin&&s.fin.q;if(!q||q.length<4)continue;
+  const e=q.slice(0,4).map(r=>r[3]);if(e.some(v=>v==null))continue;
+  const sp=(new Date(q[0][0])-new Date(q[3][0]))/(30.44*864e5);if(sp<7||sp>11)continue;
+  const eps=e.reduce((a,b)=>a+b,0),p=lastP(k),pe=s.pe>0?s.pe:null;if(!p||pe==null)continue;
+  let why=null,c1=null,c2=null;
+  if(eps>0){c1=p/eps;c2=p/(eps*FX);const g=Math.min(Math.abs(c1/pe-1),Math.abs(c2/pe-1));if(g>PE_TOL)why='פער של '+nf(g*100,0)+'% בין המכפיל של Yahoo לחישוב מהדוחות'}
+  else why='ל-Yahoo יש מכפיל, אך מדוחות הרבעונים הרווח למניה אינו חיובי';
+  if(why)bad[k]={why,pe,c1,c2,eps}}
+ const changed=Object.keys(bad).sort().join()!=Object.keys(peBad).sort().join();peBad=bad;
+ const n=Object.keys(bad).length,b=$('pea');b.style.display=n?'':'none';b.textContent='⚠ פער במכפיל: '+n;
+ if(changed)renderList()}
+function openPE(){
+ const ks=Object.keys(peBad);
+ openD(`<h2>פער במכפיל הרווח</h2><p class="sub">נבדק ברקע: מחיר חלקי סכום הרווח למניה ב-4 הרבעונים האחרונים מהדוחות. לחברות שמדווחות בדולר נבדק גם חישוב בהמרה לפי שער ${nf(FX,3)} (מ-Yahoo). התראה מופיעה רק כשהפער מעל ${PE_TOL*100}% בשני החישובים.</p>
+ <div class="tbl" style="max-height:55vh;overflow-y:auto"><table><thead><tr><th>מניה</th><th>מכפיל Yahoo</th><th>חישוב (דוחות בשקלים)</th><th>חישוב (דוחות בדולרים)</th><th>הסבר</th></tr></thead><tbody>${ks.map(k=>{const x=peBad[k];return`<tr><td>${k}</td><td class="num">${nf(x.pe,1)}</td><td class="num">${x.c1==null?'–':nf(x.c1,1)}</td><td class="num">${x.c2==null?'–':nf(x.c2,1)}</td><td>${x.why}</td></tr>`}).join('')}</tbody></table></div>
+ <p class="sub">הפער יכול לנבוע מהבדלי הגדרה (רווח מדווח מול מנורמל), מעיתוי עדכון הדוחות, או מטעות באחד המקורות. כדאי לבדוק את הדוחות של המניה לפני שמסתמכים על המכפיל.</p>`)}
+$('pea').onclick=openPE;
+
+function openCmp(){
+ const asof=new Date(+OFF.asof.slice(0,4),+OFF.asof.slice(5,7)-1,+OFF.asof.slice(8,10)),fd=d=>d.toLocaleDateString('he-IL'),ks=Object.keys(OFF.s);
+ const matched=ks.filter(k=>data[k]&&data[k].rows.length);
+ const dnote=real&&matched.length?'':`<p class="dn b">${real?'לא נמצאה התאמה בין שמות המניות בנתונים לשמות בקובץ הבורסה.':'הנתונים באפליקציה כרגע הם נתוני הדגמה מלאכותיים (לא של הבורסה). נתונים אמיתיים נטענים רק בגרסה שרצה אצלך דרך localhost.'}</p>`;
+ if(!real||!matched.length){
+  openD(`<h2>נתוני הבורסה הרשמיים</h2>${dnote}<p class="sub">הרכב ת"א-125 נכון ל-${fd(asof)}, לפי קובץ הבורסה: שער בסיס (₪), משקל במדד ושווי שוק.</p>
+  <div class="tbl" style="max-height:55vh;overflow-y:auto"><table><thead><tr><th>מניה</th><th>שער בסיס ₪</th><th>משקל %</th><th>שווי שוק (מיליוני ₪)</th></tr></thead><tbody>${ks.map(k=>`<tr><td>${k}</td><td class="num">${nf(OFF.s[k][0])}</td><td class="num">${nf(OFF.s[k][1],2)}</td><td class="num">${nf(OFF.s[k][2],0)}</td></tr>`).join('')}</tbody></table></div>`);return}
+ let c={ok:0,minor:0,bad:0,ex:0,none:0};
+ const rows=ks.map(k=>{const o=OFF.s[k],st=data[k];if(!st||!st.rows.length){c.none++;return null}
+  let r=null;for(let i=st.rows.length-1;i>=0;i--){if(st.rows[i].d<asof){r=st.rows[i];break}}
+  if(!r){c.none++;return null}
+  const df=(r.c/o[0]-1)*100,a=Math.abs(df),s=o[3]=='כן'?'ex':a<=.15?'ok':a<=1?'minor':'bad';c[s]++;return{k,o,r,df,s}}).filter(Boolean);
+ const lab={ok:'תואם',minor:'סטייה קטנה',bad:'סטייה',ex:'יום אקס'},show=rows.filter(x=>x.s!='ok').sort((a,b)=>Math.abs(b.df)-Math.abs(a.df));
+ openD(`<h2>השוואה לנתוני הבורסה</h2><p class="sub">שער בסיס רשמי ל-${fd(asof)} (לרוב שווה לשער הנעילה של יום המסחר הקודם) מול שער הסגירה האחרון באפליקציה לפני התאריך הזה.</p>
+ <p><b class="up">${c.ok} תואמות</b> (עד 0.15%) · ${c.minor} סטייה קטנה (עד 1%) · <b class="${c.bad?'dn':''}">${c.bad} סטייה</b> · ${c.ex} ביום אקס (שער בסיס מתוקן, סטייה צפויה) · ${c.none} ללא נתון להשוואה</p>
+ ${show.length?`<div class="tbl" style="max-height:50vh;overflow-y:auto"><table><thead><tr><th>מניה</th><th>רשמי ₪</th><th>באפליקציה ₪</th><th>תאריך</th><th>הפרש</th><th></th></tr></thead><tbody>${show.map(x=>`<tr><td>${x.k}</td><td class="num">${nf(x.o[0])}</td><td class="num">${nf(x.r.c)}</td><td>${fd(x.r.d)}</td><td class="num ${x.s=='bad'?'dn':''}">${nf(x.df,2)}%</td><td>${lab[x.s]}</td></tr>`).join('')}</tbody></table></div>`:'<p class="up b">כל המניות שנבדקו תואמות לנתוני הבורסה.</p>'}
+ <p class="sub">הבדיקה מתייחסת ליום אחד ולמחיר הסגירה בלבד. מקור הנתונים באפליקציה (Yahoo Finance) הוא צד שלישי, ולכן סטיות אפשריות. הדרך להבטיח זהות מלאה היא API הרשמי של הבורסה.</p>`)}
+$('cmp').onclick=openCmp;
+
+const DEF={pos:5,max:8,stop:7,take:0,cool:5,hold:2};
+const daysSince=d=>d?(Date.now()-new Date(d))/864e5:1e9;
+const equity=()=>PF.cash+Object.keys(PF.pos).reduce((a,k)=>a+PF.pos[k].q*(lastP(k)||PF.pos[k].avg),0);
+function stLbl(){$('st').textContent='אסטרטגיה'+(PF.autoOn?' · אוטומטי פעיל':'');$('st').className=PF.autoOn?'on':''}
+function autoStep(){
+ if(!PF.autoOn||!real||!isHttp())return;
+ const S=PF.str||DEF;let ch=false;
+ for(const k of Object.keys(PF.pos)){const p=lastP(k);if(!p||!data[k])continue;const q=PF.pos[k],a=A(k);let why=null;
+  if(p<=q.avg*(1-S.stop/100))why='סטופ-לוס';
+  else if(S.take>0&&p>=q.avg*(1+S.take/100))why='מימוש רווח';
+  else if(a.act=='מכירה'&&daysSince(q.d)>=S.hold)why='איתות מכירה';
+  if(why&&!trade(k,'sell',q.q,p,why))ch=true}
+ let slots=S.max-Object.keys(PF.pos).length;
+ if(slots>0){const eq=equity();
+  const c=Object.keys(data).filter(k=>!PF.pos[k]&&lastP(k)&&A(k).act=='קנייה'&&daysSince((PF.sold||{})[k])>=S.cool).sort((x,y)=>A(y).sc-A(x).sc);
+  for(const k of c){if(slots<=0)break;const p=lastP(k),q=Math.floor(Math.min(PF.cash,eq*S.pos/100)/(p*(1+FEE)));if(q>=1&&!trade(k,'buy',q,p,'איתות קנייה'))slots--,ch=true}}
+
+ if(ch)renderList();liveSnap()}
+function backtest(S,opt){opt=opt||{};const T0=opt.t0==null?-Infinity:opt.t0,T1=opt.t1==null?Infinity:opt.t1;
+ const ks=Object.keys(data).filter(k=>data[k].rows.length>260);if(!ks.length)return null;
+ const MKB=SIGV=='v2'?buildMkt():null,I={},ix={},ds=new Set();
+ ks.forEach(k=>{I[k]=inds(data[k].rows);ix[k]=new Map();data[k].rows.forEach((r,i)=>{ix[k].set(+r.d,i);ds.add(+r.d)})});
+ const D=[...ds].sort((a,b)=>a-b),px={},pos={},sold={},eq=[],bh=[],ts=[],trd=[],dts=[],xs=[];
+ let cash=100000,fees=0,pend=[],d0=-1,sh=null,nTr=0;
+ const val=()=>cash+Object.keys(pos).reduce((a,k)=>a+pos[k].q*px[k],0);
+ D.forEach((t,di)=>{
+  if(t>T1)return;
+  ks.forEach(k=>{const i=ix[k].get(t);if(i!=null)px[k]=I[k].c[i]});
+  for(const o of pend){const i=ix[o.k].get(t);if(i==null)continue;const p=I[o.k].c[i];
+   if(o.s=='sell'&&pos[o.k]){const q=pos[o.k],pr=q.q*p*(1-FEE);fees+=q.q*p*FEE;cash+=pr;ts.push(pr>q.q*q.avg);trd.push({k:o.k,hold:i-q.i,ret:pr/(q.q*q.avg)-1});delete pos[o.k];sold[o.k]=di;nTr++}
+   else if(o.s=='buy'&&!pos[o.k]&&Object.keys(pos).length<S.max){const q=Math.floor(Math.min(cash,val()*S.pos/100)/(p*(1+FEE)));if(q>=1){cash-=q*p*(1+FEE);fees+=q*p*FEE;pos[o.k]={q,avg:p*(1+FEE),di,i};nTr++}}}
+  pend=[];
+  if(d0<0&&t>=T0&&ks.some(k=>(ix[k].get(t)||0)>=200))d0=di;
+  if(d0>=0){
+   if(!sh){sh={};const act=ks.filter(k=>ix[k].has(t));act.forEach(k=>{sh[k]=100000/act.length/(px[k]*(1+FEE))})}
+   const buys=[];
+   ks.forEach(k=>{const i=ix[k].get(t);if(i==null)return;const sg=sigAt(I[k],i,MKB&&MKB.on(t)),h=pos[k];
+    if(h){const p=I[k].c[i];if(p<=h.avg*(1-S.stop/100)||(S.take>0&&p>=h.avg*(1+S.take/100))||(sg.act=='מכירה'&&di-h.di>=S.hold))pend.push({k,s:'sell'})}
+    else if(i>=200&&sg.act=='קנייה'&&(sold[k]==null||di-sold[k]>=S.cool))buys.push({k,sc:sg.sc})});
+   buys.sort((a,b)=>b.sc-a.sc).forEach(b=>pend.push({k:b.k,s:'buy'}));
+   {const v=val();xs.push((v-cash)/v);eq.push(v)}dts.push(t);bh.push(Object.keys(sh).reduce((a,k)=>a+sh[k]*px[k],0))}});
+ if(!eq.length)return null;
+ const mdd=a=>{let pk=a[0],m=0;a.forEach(v=>{pk=Math.max(pk,v);m=Math.min(m,v/pk-1)});return m*100},last=eq[eq.length-1],bl=bh[bh.length-1];
+ const ae=xs.reduce((a,b)=>a+b,0)/xs.length,bhm=bh.map(v=>100000*(1-ae)+ae*v);
+ return{ae,bhm,bhmRet:(bhm[bhm.length-1]/100000-1)*100,d0:new Date(D[d0]),d1:new Date(dts[dts.length-1]),trd,dts,eq,bh,final:last,ret:(last/100000-1)*100,bhRet:(bl/100000-1)*100,mdd:mdd(eq),bmdd:mdd(bh),nTr,closed:ts.length,win:ts.length?ts.filter(Boolean).length/ts.length*100:null,fees,open:Object.keys(pos).length}}
+function btSVG(a,b){const N=a.length,st=Math.max(1,Math.floor(N/300)),lo=Math.min(...a,...b),hi=Math.max(...a,...b),sp=hi-lo||1;
+ const pl=s=>{const o=[];for(let i=0;i<N;i+=st)o.push(i);if(o[o.length-1]!=N-1)o.push(N-1);return o.map(i=>(i/(N-1||1)*600).toFixed(1)+','+(150-(s[i]-lo)/sp*140).toFixed(1)).join(' ')};
+ return`<svg viewBox="0 0 600 160" preserveAspectRatio="none" style="width:100%;height:150px;direction:ltr"><polyline fill="none" stroke="var(--hold)" stroke-width="1.5" points="${pl(b)}"/><polyline fill="none" stroke="var(--acc)" stroke-width="2" points="${pl(a)}"/></svg><p class="sub">כחול: האסטרטגיה · צהוב: קנייה והחזקה במשקל שווה</p>`}
+function btHTML(r){
+ if(!r)return'<p class="dn">אין מספיק היסטוריה לבדיקה (נדרשות יותר מ-260 ימי מסחר למניה). המתן לטעינת נתונים אמיתיים.</p>';
+ const pc=v=>`<span class="${v>=0?'up':'dn'}">${nf(v,1)}%</span>`,fd=d=>d.toLocaleDateString('he-IL');
+ return`<h3>תוצאות בדיקה לאחור</h3><p>תקופה: ${fd(r.d0)} עד ${fd(r.d1)} · הון התחלתי 100,000 ₪</p>
+ <div class="tbl"><table><tbody><tr><td></td><th>האסטרטגיה</th><th>קנייה והחזקה</th><th>מותאמת חשיפה</th></tr>
+ <tr><td>תשואה</td><td class="num">${pc(r.ret)}</td><td class="num">${pc(r.bhRet)}</td><td class="num">${pc(r.bhmRet)}</td></tr>
+ <tr><td>ירידה מקסימלית</td><td class="num">${nf(r.mdd,1)}%</td><td class="num">${nf(r.bmdd,1)}%</td><td></td></tr></tbody></table></div>
+ <p>שווי סופי: <b>${nf(r.final,0)} ₪</b> · פעולות: ${r.nTr} · עסקאות סגורות: ${r.closed}${r.win==null?'':` (${nf(r.win,0)}% ברווח)`} · עמלות: ${nf(r.fees,0)} ₪ · פוזיציות פתוחות בסוף: ${r.open}</p>
+ ${btSVG(r.eq,r.bh)}
+ <p class="${r.ret>r.bhmRet?'up':'dn'}">${r.ret>r.bhmRet?'בתקופה הזו האסטרטגיה עקפה את הבנצ׳מרק המותאם לחשיפה.':'בתקופה הזו האסטרטגיה לא עקפה את הבנצ׳מרק המותאם לחשיפה.'}</p>
+ <p class="sub">הסתייגויות: הרשימה כוללת מניות שקיימות היום בלבד (הטיית שרידות שמייפה את התוצאות); הביצוע ביום המסחר שאחרי האיתות, במחיר הסגירה ובלי החלקה; תקופה היסטורית אחת אינה ערובה לעתיד. בבדיקה ימי צינון והחזקה נספרים כימי מסחר.</p>`}
+
+const lin=(v,a,b)=>Math.max(0,Math.min(100,(v-a)/(b-a)*100));
+function randTest(r,t0,t1){
+ const T=r.trd;if(T.length<5)return null;
+ const mean=a=>a.reduce((x,y)=>x+y,0)/a.length,act=mean(T.map(t=>t.ret)),info={};
+ T.forEach(t=>{if(!info[t.k]){const rows=data[t.k].rows;let a=0,b=rows.length-1;while(a<rows.length&&+rows[a].d<t0)a++;while(b>=0&&+rows[b].d>t1)b--;info[t.k]={c:rows.map(x=>x.c),a:Math.max(a,201),b}}});
+ let ge=0;const N=1000;
+ for(let s=0;s<N;s++){const rs=T.map(t=>{const f=info[t.k],h=Math.max(1,t.hold),span=f.b-f.a-h;if(span<1)return t.ret;const i=f.a+Math.floor(Math.random()*span);return f.c[i+h]/f.c[i]*(1-FEE)/(1+FEE)-1});if(mean(rs)>=act)ge++}
+ return{p:(ge+1)/(N+1),act,n:T.length}}
+function evalRun(r,rp){
+ const yrs=Math.max((r.dts[r.dts.length-1]-r.dts[0])/(365.25*864e5),1e-6),cg=v=>(Math.pow(v/100000,1/yrs)-1)*100;
+ const ex=cg(r.final)-cg(r.bhm[r.bhm.length-1]);
+ const rets=r.eq.slice(1).map((v,i)=>v/r.eq[i]-1),mu=rets.reduce((a,b)=>a+b,0)/(rets.length||1),sd=Math.sqrt(rets.reduce((a,b)=>a+(b-mu)*(b-mu),0)/(rets.length||1));
+ const sh=sd>0?mu/sd*Math.sqrt(252):0;
+ let up=0,nb=0;for(let b=63;b<r.eq.length;b+=63){nb++;if(r.eq[b]>r.eq[b-63])up++}
+ const cons=nb?up/nb:0,rel=Math.min(1,r.closed/30);
+ const parts=[
+  {n:'תשואה שנתית עודפת על קנייה-והחזקה מותאמת חשיפה',v:nf(ex,1)+'% בשנה',pts:lin(ex,-5,10),w:35},
+  {n:'יחס תשואה לסיכון (שארפ)',v:nf(sh,2),pts:lin(sh,0,1.5),w:25},
+  {n:'ירידה מקסימלית',v:nf(r.mdd,1)+'%',pts:lin(r.mdd,-40,-5),w:15},
+  {n:'עקביות (תקופות של 3 חודשים ברווח)',v:nf(cons*100,0)+'%',pts:lin(cons*100,40,65),w:15},
+  {n:'מובהקות מול כניסות אקראיות',v:rp?'p = '+nf(rp.p,3):'אין (מעט עסקאות)',pts:rp?lin(rp.p,.5,.05):0,w:10}];
+ return{score:Math.round(parts.reduce((a,x)=>a+x.pts*x.w/100,0)*rel),parts,rel,ex,sh,cons}}
+function evHTML(ttl,r,ev,rp){
+ const fd=d=>d.toLocaleDateString('he-IL'),c=ev.score>=60?'up':ev.score>=40?'':'dn';
+ return`<h3>${ttl}</h3><p class="sub">${fd(r.d0)} עד ${fd(r.d1)} · ${r.closed} עסקאות סגורות · תשואה ${nf(r.ret,1)}% (קנייה-והחזקה מלאה: ${nf(r.bhRet,1)}%; מותאמת לחשיפה ממוצעת של ${nf(r.ae*100,0)}%: ${nf(r.bhmRet,1)}%)</p>
+ <p class="b ${c}" style="font-size:28px;margin:4px 0">${ev.score} / 100</p>
+ <div class="tbl"><table><thead><tr><th>רכיב</th><th>ערך</th><th>ניקוד (0–100)</th><th>משקל</th></tr></thead><tbody>${ev.parts.map(x=>`<tr><td>${x.n}</td><td class="num">${x.v}</td><td class="num">${x.pts.toFixed(0)}</td><td class="num">${x.w}%</td></tr>`).join('')}</tbody></table></div>
+ <p class="sub">מכפיל אמינות לפי מספר עסקאות: ${nf(ev.rel*100,0)}% (30 עסקאות ומעלה = 100%). ${rp?`בדיקת אקראיות: הרווח הממוצע לעסקה ${nf(rp.act*100,2)}%, ובכניסות אקראיות באותן מניות ובאותם משכי החזקה התקבל רווח כזה או גבוה יותר ב-${nf(rp.p*100,1)}% מ-1,000 הסימולציות.`:'בדיקת אקראיות לא בוצעה (פחות מ-5 עסקאות).'}</p>`}
+function splitDates(ty){const s=new Set();Object.keys(data).forEach(k=>data[k].rows.forEach(r=>s.add(+r.d)));const D=[...s].sort((a,b)=>a-b),end=D[D.length-1];return{start:D[0],split:end-ty*365.25*864e5,end}}
+function runPeriod(S,t0,t1){const r=backtest(S,{t0,t1});if(!r)return null;const rp=randTest(r,t0,t1);return{r,rp,ev:evalRun(r,rp)}}
+function verdict(trn,tst){
+ const deg=trn.ev.score>0?tst.ev.score/trn.ev.score:null,why=[];
+ if(tst.r.closed<10)return'<p class="dn b">מעט מדי עסקאות במבחן ('+tst.r.closed+') כדי להסיק מסקנה.</p>';
+ if(tst.ev.score<60)why.push('ציון המבחן נמוך מ-60');
+ if(!tst.rp||tst.rp.p>.1)why.push('אין מובהקות מול כניסות אקראיות (p גבוה מ-0.1)');
+ if(deg!=null&&deg<.7)why.push('ירידה משמעותית בביצועים מהאימון למבחן (חשש להתאמת יתר)');
+ if(tst.r.ret<=tst.r.bhmRet)why.push('האסטרטגיה לא עקפה קנייה-והחזקה מותאמת-חשיפה (הבנצ׳מרק ההוגן) בתקופת המבחן');
+ return why.length?`<p class="dn b">אין עדות מספקת לכך שהאסטרטגיה עובדת:</p><ul>${why.map(x=>'<li>'+x+'</li>').join('')}</ul>`:'<p class="up b">סימנים ראשוניים חיוביים: ציון גבוה, מובהקות מול אקראיות ושמירה על רוב הביצועים מחוץ למדגם.</p><p class="sub">זו עדיין אינה הוכחה: המדגם קטן והרשימה סובלת מהטיית שרידות. השלב הבא הוא מסחר מדומה חי לאורך שבועות.</p>'}
+function trainTest(S,ty,final){
+ const sp=splitDates(ty);
+ if((sp.split-sp.start)/(365.25*864e5)<1.8)return'<p class="dn">אין מספיק היסטוריה לחלוקה: נדרשות לפחות כ-4 שנים בסך הכול (כולל כ-9 חודשי חימום לאינדיקטורים), כשהמבחן הוא '+ty+' השנים האחרונות. המתן לטעינת נתונים אמיתיים (אוטומטית כשהסורק נפתח דרך http://localhost:8765/).</p>';
+ const trn=runPeriod(S,sp.start,sp.split);if(!trn)return'<p class="dn">אין מספיק נתונים לתקופת האימון.</p>';
+ let out=evHTML('אימון (לכוונון, בלי חפיפה עם המבחן)',trn.r,trn.ev,trn.rp);
+ if(!final)return out+'<p class="sub">כוונן פרמטרים והרץ שוב. כשתסיים, הרץ את בדיקת המבחן הסופית.</p>';
+ const tst=runPeriod(S,sp.split+1,sp.end);if(!tst)return out+'<p class="dn">אין מספיק נתונים לתקופת המבחן.</p>';
+ const key=JSON.stringify(S),prev=(PF.testLog||[]).filter(x=>x.k==key).length;
+ (PF.testLog=PF.testLog||[]).push({t:new Date().toISOString(),k:key,score:tst.ev.score});PF.testLog=PF.testLog.slice(-50);savePF();
+ return`${SIGV=='v2'?'<p class="dn">גרסת v2 תוכננה אחרי שראית את תוצאות המבחן הישן, ולכן גם תקופת המבחן הזו אינה נקייה לחלוטין. העדף Walk-Forward וסימולציה חיה.</p>':''}<p class="${(PF.testLog.length>1)?'dn':'sub'}">בדיקות מבחן שבוצעו עד כה: ${PF.testLog.length}${prev?` (הפרמטרים האלה כבר נבדקו ${prev} פעמים, ולכן זה כבר לא מבחן נקי)`:''}. כל בדיקה נוספת על אותה תקופה מחלישה את מהימנות התוצאה.</p>`+evHTML('מבחן (מחוץ למדגם)',tst.r,tst.ev,tst.rp)+out+'<h3>מסקנה</h3>'+verdict(trn,tst)}
+
+let optBusy=false,optStop=false;
+async function optimize(S,ty,out){
+ const sp=splitDates(ty);
+ if((sp.split-sp.start)/(365.25*864e5)<1.8){out.innerHTML='<p class="dn">אין מספיק היסטוריה לאופטימיזציה: נדרשות לפחות כ-4 שנים בסך הכול. המתן לטעינת נתונים אמיתיים (אוטומטית כשהסורק נפתח דרך http://localhost:8765/).</p>';return}
+ const G={stop:[5,7,10,15],cool:[0,5,10],hold:[0,2,5],take:[0,15,30]},ax=['stop','cool','hold','take'],combos=[];
+ for(const a of G.stop)for(const b of G.cool)for(const c of G.hold)for(const d of G.take)combos.push([a,b,c,d]);
+ optBusy=true;optStop=false;const res={},t0=Date.now();
+ try{
+  for(let n=0;n<combos.length;n++){
+   if(optStop||!out.isConnected)break;
+   const c=combos[n],r=backtest({...S,stop:c[0],cool:c[1],hold:c[2],take:c[3]},{t0:sp.start,t1:sp.split});
+   res[c.join('|')]=r?{sc:evalRun(r,null).score,n:r.closed,ret:r.ret}:{sc:0,n:0,ret:0};
+   if(n%3==0){out.innerHTML=`<p class="sub">מחשב ${n+1} / ${combos.length}… <button id="s_oc">ביטול</button></p>`;$('s_oc').onclick=()=>{optStop=true};await new Promise(ok=>setTimeout(ok,0))}}
+ }finally{optBusy=false}
+ if(!out.isConnected)return;
+ if(optStop){out.innerHTML='<p class="sub">האופטימיזציה בוטלה.</p>';return}
+ const rows=combos.map(c=>{const nb=[];
+  for(let q=0;q<4;q++){const j=G[ax[q]].indexOf(c[q]);[j-1,j+1].forEach(jj=>{if(jj>=0&&jj<G[ax[q]].length){const c2=c.slice();c2[q]=G[ax[q]][jj];nb.push(res[c2.join('|')].sc)}})}
+  const own=res[c.join('|')],na=nb.reduce((a,b)=>a+b,0)/nb.length;return{c,sc:own.sc,n:own.n,ret:own.ret,nb:na,st:(own.sc+na)/2}});
+ const ok=rows.filter(x=>x.n>=20).sort((a,b)=>(b.st-a.st)||(b.ret-a.ret));
+ if(!ok.length){out.innerHTML='<p class="dn">אף צירוף לא הניב לפחות 20 עסקאות בתקופת האימון, ולכן אי אפשר לדרג אותם באמינות.</p>';return}
+ const base=runPeriod(S,sp.start,sp.split),bs=base?evalRun(base.r,null).score:null,top=ok.slice(0,5);
+ out.innerHTML=`<h3>תוצאות אופטימיזציה (תקופת האימון בלבד)</h3>
+ <p class="sub">נבדקו ${combos.length} צירופים תוך ${Math.round((Date.now()-t0)/1000)} שניות. הציון כאן הוא ציון האימון ללא רכיב המובהקות (מקסימום 90). הדירוג לפי ציון יציב: ממוצע הציון של הצירוף וממוצע שכניו, כדי להעדיף אזורים יציבים על פני שיא מקרי. נכללו רק צירופים עם 20 עסקאות לפחות. בשוויון בציון מדורג לפי תשואת האימון.${bs==null?'':` הפרמטרים הנוכחיים שלך: ${bs}.`}</p>
+ <div class="tbl"><table><thead><tr><th>סטופ-לוס</th><th>צינון</th><th>החזקה</th><th>מימוש</th><th>ציון</th><th>ממוצע שכנים</th><th>ציון יציב</th><th>עסקאות</th><th>תשואה באימון</th><th></th></tr></thead><tbody>${top.map((x,i)=>`<tr><td class="num">${x.c[0]}%</td><td class="num">${x.c[1]}</td><td class="num">${x.c[2]}</td><td class="num">${x.c[3]?x.c[3]+'%':'כבוי'}</td><td class="num">${x.sc}</td><td class="num">${nf(x.nb,0)}</td><td class="num b">${nf(x.st,0)}</td><td class="num">${x.n}</td><td class="num">${nf(x.ret,0)}%</td><td><button class="adopt" data-i="${i}">אמץ</button></td></tr>`).join('')}</tbody></table></div>
+ ${bs!=null&&top[0].st-bs<3?'<p class="dn">השיפור לעומת הפרמטרים הנוכחיים קטן. ייתכן שאין טעם בכוונון נוסף.</p>':''}
+ <p class="sub">אחרי שתאמץ צירוף, הרץ "אימון" לבדיקה, ובסוף "בדיקת מבחן סופית" פעם אחת. ככל שנבדקו יותר צירופים, גדל החשש שהמנצח מקרי.</p>`;
+ document.querySelectorAll('.adopt').forEach(b=>b.onclick=()=>{const x=top[+b.dataset.i];$('s_stop').value=x.c[0];$('s_cool').value=x.c[1];$('s_hold').value=x.c[2];$('s_take').value=x.c[3];readS();b.textContent='אומץ'})}
+
+const mddOf=a=>{let pk=a[0],m=0;a.forEach(v=>{pk=Math.max(pk,v);m=Math.min(m,v/pk-1)});return m*100};
+const MN={ma:'ממוצעים',rsi:'RSI',macd:'MACD',vol:'נפח'},yld=()=>new Promise(ok=>setTimeout(ok,0));
+const fdm=d=>new Date(d).toLocaleDateString('he-IL',{month:'2-digit',year:'2-digit'});
+async function ablation(S,ty,out){
+ const sp=splitDates(ty);
+ if((sp.split-sp.start)/(365.25*864e5)<1.8){out.innerHTML='<p class="dn">אין מספיק היסטוריה (נדרשות לפחות כ-4 שנים). המתן לטעינת נתונים אמיתיים (אוטומטית כשהסורק נפתח דרך http://localhost:8765/).</p>';return}
+ const FLG=SIGV=='v2'?PV2:P,ks=Object.keys(FLG),NN=SIGV=='v2'?MN2:MN,TOT=(1<<ks.length)-1,rows=[],saved={...FLG};optBusy=true;optStop=false;
+ try{for(let m=1;m<=TOT;m++){
+  if(optStop||!out.isConnected)break;
+  const on=ks.filter((_,i)=>m>>i&1);let r;
+  ks.forEach(k=>FLG[k]=on.includes(k));
+  try{r=backtest(S,{t0:sp.start,t1:sp.split})}finally{Object.assign(FLG,saved)}
+  rows.push({on,sc:r?evalRun(r,null).score:0,n:r?r.closed:0,ret:r?r.ret:0,exs:r?r.ret-r.bhmRet:0});
+  out.innerHTML=`<p class="sub">מחשב ${m} / ${TOT}… <button id="s_oc">ביטול</button></p>`;$('s_oc').onclick=()=>{optStop=true};await yld()}}
+ finally{Object.assign(FLG,saved);optBusy=false}
+ if(!out.isConnected)return;if(optStop){out.innerHTML='<p class="sub">בוטל.</p>';return}
+ const el=rows.filter(x=>x.n>=10),m=z=>z.reduce((s,x)=>s+x.sc,0)/z.length;
+ const mg=k=>{const a=el.filter(x=>x.on.includes(k)),b=el.filter(x=>!x.on.includes(k));return a.length&&b.length?m(a)-m(b):null};
+ rows.sort((a,b)=>(b.sc-a.sc)||(b.ret-a.ret));
+ out.innerHTML=`<h3>ניתוח תרומת מדדים (תקופת האימון בלבד)</h3>
+ <div class="tbl"><table><thead><tr><th>מדדים פעילים</th><th>ציון</th><th>עסקאות</th><th>תשואה</th><th>עודף על בנצ׳מרק מותאם (נק׳ אחוז)</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${x.on.map(k=>NN[k]).join(' + ')}</td><td class="num">${x.sc}</td><td class="num">${x.n}</td><td class="num">${nf(x.ret,0)}%</td><td class="num ${x.exs>=0?'up':'dn'}">${nf(x.exs,0)}</td></tr>`).join('')}</tbody></table></div>
+ <p>תרומה שולית ממוצעת לציון (צירופים עם המדד לעומת בלעדיו): ${ks.map(k=>{const v=mg(k);return NN[k]+': '+(v==null?'–':(v>=0?'+':'')+nf(v,1))}).join(' · ')}</p>
+ <p class="sub">הציון כאן ללא רכיב המובהקות. הניתוח כולל ${TOT} צירופים, והבדלים קטנים ביניהם הם בדרך כלל רעש ולא ראיה לכך שמדד מועיל או מזיק. מדד "מועיל" אמיתי יופיע גם בצירופים הטובים וגם בתרומה השולית החיובית. לא להתאים את ההחלטה לתקופת המבחן.</p>`}
+function chainRuns(rs){
+ let cap=100000,cb=100000,cm=100000;const o={eq:[],bh:[],bhm:[],dts:[],trd:[],closed:0,aeS:0};
+ rs.forEach(r=>{const f=cap/100000,fb=cb/100000,fm=cm/100000;
+  r.eq.forEach(v=>o.eq.push(v*f));r.bh.forEach(v=>o.bh.push(v*fb));r.bhm.forEach(v=>o.bhm.push(v*fm));
+  cap=r.eq[r.eq.length-1]*f;cb=r.bh[r.bh.length-1]*fb;cm=r.bhm[r.bhm.length-1]*fm;
+  r.dts.forEach(t=>o.dts.push(t));r.trd.forEach(t=>o.trd.push(t));o.closed+=r.closed;o.aeS+=r.ae});
+ o.final=cap;o.ret=(cap/100000-1)*100;o.bhRet=(cb/100000-1)*100;o.bhmRet=(cm/100000-1)*100;o.ae=o.aeS/rs.length;
+ o.mdd=mddOf(o.eq);o.bmdd=mddOf(o.bh);o.d0=rs[0].d0;o.d1=rs[rs.length-1].d1;return o}
+async function walkForward(S,out){
+ const sp=splitDates(0),Y=365.25*864e5,TR=2*Y,TS=Y/2,W=[];
+ for(let a=sp.start;a+TR+TS<=sp.end;a+=TS)W.push({a,b:a+TR,c:a+TR+1,d:a+TR+TS});
+ if(W.length<2){out.innerHTML='<p class="dn">אין מספיק היסטוריה ל-Walk-Forward (נדרשות לפחות כ-3.5 שנים כולל חימום). המתן לטעינת נתונים אמיתיים (אוטומטית כשהסורק נפתח דרך http://localhost:8765/).</p>';return}
+ const G={stop:[5,10,15],cool:[0,10],hold:[0,5],take:[0,15]},cb=[];
+ for(const a of G.stop)for(const b of G.cool)for(const c of G.hold)for(const d of G.take)cb.push({stop:a,cool:b,hold:c,take:d});
+ optBusy=true;optStop=false;const res=[];
+ try{for(let w=0;w<W.length;w++){
+  let best=null;
+  for(let j=0;j<cb.length;j++){
+   if(optStop||!out.isConnected)throw 0;
+   const r=backtest({...S,...cb[j]},{t0:W[w].a,t1:W[w].b});
+   if(r&&r.closed>=10){const sc=evalRun(r,null).score;if(!best||sc>best.sc||(sc==best.sc&&r.ret>best.ret))best={sc,ret:r.ret,p:cb[j]}}
+   if(j%2==0){out.innerHTML=`<p class="sub">חלון ${w+1} / ${W.length}, צירוף ${j+1} / ${cb.length}… <button id="s_oc">ביטול</button></p>`;$('s_oc').onclick=()=>{optStop=true};await yld()}}
+  const pr=best?best.p:{stop:S.stop,cool:S.cool,hold:S.hold,take:S.take},t=backtest({...S,...pr},{t0:W[w].c,t1:W[w].d});
+  if(t)res.push({w:W[w],pr,sc:best?best.sc:null,t})}}
+ catch(e){if(e!==0)throw e;optBusy=false;if(out.isConnected)out.innerHTML='<p class="sub">בוטל.</p>';return}
+ finally{optBusy=false}
+ if(!out.isConnected)return;if(!res.length){out.innerHTML='<p class="dn">לא נוצרו תקופות בדיקה.</p>';return}
+ const pooled=chainRuns(res.map(x=>x.t)),rp=randTest(pooled,res[0].w.c,sp.end),ev=evalRun(pooled,rp);
+ out.innerHTML=`<h3>Walk-Forward (אימון ${2} שנים, בדיקה חצי שנה, צעד חצי שנה)</h3>
+ <div class="tbl"><table><thead><tr><th>אימון</th><th>בדיקה</th><th>סטופ / צינון / החזקה / מימוש</th><th>ציון אימון</th><th>תשואת הבדיקה</th><th>בנצ׳מרק מותאם</th></tr></thead><tbody>${res.map(x=>`<tr><td>${fdm(x.w.a)}–${fdm(x.w.b)}</td><td>${fdm(x.w.c)}–${fdm(x.w.d)}</td><td class="num">${x.pr.stop}% / ${x.pr.cool} / ${x.pr.hold} / ${x.pr.take?x.pr.take+'%':'כבוי'}</td><td class="num">${x.sc==null?'–':x.sc}</td><td class="num ${x.t.ret>=0?'up':'dn'}">${nf(x.t.ret,1)}%</td><td class="num">${nf(x.t.bhmRet,1)}%</td></tr>`).join('')}</tbody></table></div>
+ ${evHTML('תקופות הבדיקה בשרשור (כולן מחוץ למדגם)',pooled,ev,rp)}<h3>מסקנה</h3>${verdict({ev:{score:0}},{r:pooled,ev,rp})}
+ <p class="sub">בכל חלון נבחר הצירוף על תקופת האימון שלו בלבד (24 צירופים) והופעל על התקופה שאחריה. זה בודק את תהליך הכוונון כולו ולא פרמטרים בודדים. ${res.length} חלונות הם מדגם קטן.</p>`}
+function liveSnap(){
+ if(!PF.live)return;const e=equity(),d=new Date().toISOString().slice(0,10);
+ PF.live.snap[d]={e,x:(e-PF.cash)/e};
+ if(Date.now()-(liveSnap.t||0)>6e5){liveSnap.t=Date.now();savePF()}}
+function liveHTML(){
+ const L=PF.live;
+ if(!L)return'<p class="sub">מעקב סימולציה חיה מתחיל מתיק נקי (100,000 ₪), מפעיל מסחר אוטומטי עם הפרמטרים שבחלון, ומשווה את התוצאה לבנצ׳מרק מותאם-חשיפה על אותן מניות. אפשר לעקוב לאורך שבועות.</p>';
+ const e=equity(),days=(Date.now()-new Date(L.t0))/864e5,ks=Object.keys(L.px0).filter(k=>lastP(k)),bh=ks.reduce((a,k)=>a+(lastP(k)/L.px0[k]-1),0)/(ks.length||1)*100;
+ const xs=Object.values(L.snap).map(s=>s.x),ae=xs.reduce((a,b)=>a+b,0)/(xs.length||1),bm=ae*bh,ret=(e/L.eq0-1)*100;
+ const closed=PF.log.filter(l=>l.side=='sell'&&l.why).length;
+ return`<p>התחלה: ${new Date(L.t0).toLocaleDateString('he-IL')} (לפני ${nf(days,0)} ימים) · שווי נוכחי: <b>${nf(e,0)} ₪</b> · תשואה: <b class="${ret>=0?'up':'dn'}">${nf(ret,1)}%</b></p>
+ <p>קנייה-והחזקה על אותן מניות: ${nf(bh,1)}% · מותאמת לחשיפה ממוצעת של ${nf(ae*100,0)}%: <b>${nf(bm,1)}%</b> · מכירות אוטומטיות: ${closed}</p>
+ ${days<20||closed<15?'<p class="sub">מוקדם מדי להסיק מסקנות: נדרשים לפחות כ-20 ימים ו-15 עסקאות סגורות.</p>':`<p class="${ret>bm?'up':'dn'} b">${ret>bm?'עד כה התיק עוקף את הבנצ׳מרק המותאם':'עד כה התיק לא עוקף את הבנצ׳מרק המותאם'}. עדיין אין בכך הוכחה סטטיסטית.</p>`}`}
+
+const HZ=[1,5,21],HBAND=[.01,.02,.05];
+function hitStats(split){
+ const ks=Object.keys(data).filter(k=>data[k].rows.length>260),MKB=SIGV=='v2'?buildMkt():null,td=new Date();td.setHours(0,0,0,0);
+ const mkS=()=>({'קנייה':HZ.map(()=>({n:0,hit:0,sum:0})),'מכירה':HZ.map(()=>({n:0,hit:0,sum:0})),'המתנה':HZ.map(()=>({n:0,hit:0,sum:0})),all:HZ.map(()=>({n:0,hit:0,sum:0}))});
+ const out={full:mkS(),test:mkS()};
+ for(const k of ks){const rows=data[k].rows.filter(r=>+r.d<+td),I=inds(rows);
+  for(let i=200;i<rows.length;i++){const t=+rows[i].d,sg=sigAt(I,i,MKB&&MKB.on(t)).act,sets=t>split?[out.full,out.test]:[out.full];
+   HZ.forEach((hh,j)=>{if(i+hh>=rows.length)return;const r=rows[i+hh].c/rows[i].c-1;
+    for(const S of sets){const a=S[sg][j],b=S.all[j];a.n++;a.sum+=r;b.n++;b.sum+=r;
+     if((sg=='קנייה'&&r>0)||(sg=='מכירה'&&r<0)||(sg=='המתנה'&&Math.abs(r)<=HBAND[j]))a.hit++;if(r>0)b.hit++}})}}
+ return out}
+function hitHTML(S,ttl){
+ const HN=['יום מסחר אחד אחרי האיתות','שבוע (5 ימי מסחר) אחרי','חודש (21 ימי מסחר) אחרי'];
+ return`<h3>${ttl}</h3>`+HZ.map((hh,j)=>{
+  const rows=['קנייה','מכירה','המתנה'].map(sg=>{const a=S[sg][j];if(!a.n)return`<tr><td>${sg}</td><td colspan="3" class="sub">אין מקרים</td></tr>`;const p=a.hit/a.n,ci=1.96*Math.sqrt(p*(1-p)/Math.max(1,a.n/hh));
+   return`<tr><td class="b ${sg}">${sg}</td><td class="num">${a.n.toLocaleString('he-IL')}</td><td class="num">${nf(p*100,1)}% (±${nf(ci*100,1)})</td><td class="num">${nf(a.sum/a.n*100,2)}%</td></tr>`}).join('');
+  const b=S.all[j];
+  return`<p class="b" style="margin:8px 0 2px">${HN[j]}</p><div class="tbl"><table><thead><tr><th>איתות</th><th>מקרים</th><th>אחוז פגיעה (±טווח)</th><th>תשואה ממוצעת</th></tr></thead><tbody>${rows}</tbody></table></div><p class="sub" style="margin:2px 0">פגיעה: קנייה = המחיר עלה · מכירה = המחיר ירד · המתנה = נשאר בטווח ±${HBAND[j]*100}%. לשם השוואה, בכל המקרים בלי קשר לאיתות: ${b.n?nf(b.hit/b.n*100,1):'–'}% עלו, תשואה ממוצעת ${b.n?nf(b.sum/b.n*100,2):'–'}%.</p>`}).join('')}
+function hitRun(ty,out){
+ const sp=splitDates(ty);
+ if((sp.end-sp.start)/(365.25*864e5)<1.5){out.innerHTML='<p class="dn">אין מספיק היסטוריה (נדרשות לפחות כשנה וחצי כולל חימום).</p>';return}
+ out.innerHTML='<p class="sub">מחשב…</p>';
+ setTimeout(()=>{const R=hitStats(sp.split);
+  out.innerHTML=`<h2 style="font-size:16px;margin:8px 0 0">בדיקת פגיעות האיתות (גרסה ${SIGV=='v2'?'משופרת v2':'מקורית v1'})</h2>
+  <p class="sub">לכל מניה בכל יום: מה היה האיתות באותו יום, ומה קרה למחיר אחר כך (ממחיר הסגירה של יום האיתות). מוצג כמה פעמים האיתות התאים למה שקרה.</p>`+hitHTML(R.full,'כל ההיסטוריה')+hitHTML(R.test,`תקופת המבחן בלבד (${ty} השנים האחרונות)`)+
+  `<h3>איך לקרוא את זה</h3><p class="sub">אחוז פגיעה גבוה לא מספיק: מה שקובע הוא ההשוואה לשורה "בכל המקרים". אם 55% ממניות הקנייה עלו אבל גם 54% מכלל המקרים עלו, האיתות לא הוסיף כמעט כלום. ה-(±) הוא טווח טעות משוער, אבל הוא אופטימי: ימים סמוכים חולקים נתונים (במיוחד בשבוע ובחודש), ומניות נעות יחד. אין כאן הוכחה, רק אינדיקציה.</p>`},30)}
+function readS(){const g=(id,d,mn,mx)=>{const v=parseFloat($(id).value);return isNaN(v)?d:Math.min(mx,Math.max(mn,v))};
+ PF.str={pos:g('s_pos',5,.5,100),max:Math.round(g('s_max',8,1,10000)),stop:g('s_stop',7,.5,90),take:g('s_take',0,0,500),cool:g('s_cool',5,0,60),hold:g('s_hold',2,0,60)};savePF();return PF.str}
+function toggleAuto(){
+ if(!PF.autoOn&&(!real||!isHttp())){alert('מסחר אוטומטי פועל רק על נתונים אמיתיים ובסורק שנפתח דרך http://localhost:8765/. המתן קודם לטעינת נתונים אמיתיים.');return}
+ PF.autoOn=!PF.autoOn;savePF();stLbl()}
+function openStr(res){
+ const S=PF.str||DEF,fld=(id,l,v)=>`<label class="fl">${l} <input id="${id}" type="number" step="any" value="${v}" style="width:80px;font:inherit"></label>`;
+ openD(`<h2>אסטרטגיה ומסחר אוטומטי (סימולציה)</h2>${demoNote()}<p class="sub">גרסת איתות פעילה: <b>${SIGV=='v2'?'משופר (v2)':'מקורי (v1)'}</b>. החלפה בכפתור "איתות" בראש הדף.</p>
+ ${fld('s_pos','גודל פוזיציה (% משווי התיק)',S.pos)}${fld('s_max','מקסימום מניות במקביל',S.max)}${fld('s_stop','סטופ-לוס (% ירידה מעלות)',S.stop)}${fld('s_take','מימוש רווח (% עלייה, 0 = כבוי)',S.take)}${fld('s_cool','צינון אחרי מכירה (ימים)',S.cool)}${fld('s_hold','החזקה מינימלית לפני מכירה לפי איתות (ימים)',S.hold)}
+ <div class="bar"><button id="s_bt">בדיקה על כל התקופה (לא לאימות)</button><button id="s_au" class="${PF.autoOn?'on':''}">מסחר אוטומטי: ${PF.autoOn?'פעיל (לחץ לכיבוי)':'כבוי (לחץ להפעלה)'}</button></div>
+ <h3>אימון ומבחן (אימות מחוץ למדגם)</h3>
+ <label class="fl">שנות מבחן (החלק האחרון בהיסטוריה) <input id="s_ty" type="number" step="0.5" min="0.5" value="${PF.ty||2}" style="width:80px;font:inherit"></label>
+ <div class="bar"><button id="s_op">אופטימיזציה (על תקופת האימון)</button><button id="s_hit">בדיקת פגיעות האיתות</button><button id="s_ab">ניתוח תרומת מדדים</button><button id="s_wf">Walk-Forward</button><button id="s_tr">אימון (לכוונון פרמטרים)</button><button id="s_ts" class="on">בדיקת מבחן סופית</button></div>
+ <div id="s_res">${res||''}</div>
+ <h3>סימולציה חיה</h3><div id="s_live">${liveHTML()}</div><div class="bar"><button id="s_lv">${PF.live?'התחל מחדש (מאפס את התיק)':'התחל מעקב סימולציה חיה'}</button></div>
+ <p class="sub">הכללים: קנייה באיתות "קנייה" (לפי ציון, עד המקסימום), מכירה באיתות "מכירה", בסטופ-לוס או במימוש רווח. המסחר האוטומטי פועל רק כשהסורק פתוח, על נתונים אמיתיים, ורק בתיק המדומה. הפעלה מאפשרת קניות מיידיות לפי האיתותים הנוכחיים. זה כלי בדיקה ואינו ייעוץ השקעות.</p>`);
+ $('s_bt').onclick=()=>{const S=readS();$('s_res').innerHTML='<p class="sub">מחשב…</p>';setTimeout(()=>{$('s_res').innerHTML=btHTML(backtest(S))},30)};
+ $('s_au').onclick=()=>{readS();toggleAuto();openStr($('s_res').innerHTML)};
+ const go=fin=>{const S=readS();PF.ty=Math.max(.5,parseFloat($('s_ty').value)||2);savePF();$('s_res').innerHTML='<p class="sub">מחשב…</p>';setTimeout(()=>{$('s_res').innerHTML=trainTest(S,PF.ty,fin)},30)};
+ $('s_op').onclick=()=>{if(optBusy)return;const S=readS();PF.ty=Math.max(.5,parseFloat($('s_ty').value)||2);savePF();optimize(S,PF.ty,$('s_res'))};
+ $('s_hit').onclick=()=>{if(optBusy)return;readS();PF.ty=Math.max(.5,parseFloat($('s_ty').value)||2);savePF();hitRun(PF.ty,$('s_res'))};
+ $('s_ab').onclick=()=>{if(optBusy)return;const S=readS();PF.ty=Math.max(.5,parseFloat($('s_ty').value)||2);savePF();ablation(S,PF.ty,$('s_res'))};
+ $('s_wf').onclick=()=>{if(optBusy)return;walkForward(readS(),$('s_res'))};
+ $('s_lv').onclick=()=>{
+  if(!real||!isHttp()){alert('סימולציה חיה דורשת נתונים אמיתיים ופתיחה דרך http://localhost:8765/. המתן קודם לטעינת נתונים אמיתיים.');return}
+  if(!confirm('לאפס את התיק המדומה ל-100,000 ₪, למחוק את ההיסטוריה ולהפעיל מסחר אוטומטי?'))return;
+  const S=readS(),px0={};Object.keys(data).forEach(k=>{const p=lastP(k);if(p)px0[k]=p});
+  PF={cash:100000,start:100000,pos:{},log:[],str:S,autoOn:true,ty:PF.ty,testLog:PF.testLog,live:{t0:new Date().toISOString(),eq0:100000,px0,snap:{}}};
+  savePF();stLbl();renderList();openStr()};
+ $('s_tr').onclick=()=>go(false);$('s_ts').onclick=()=>go(true)}
+$('st').onclick=()=>openStr();stLbl();
+
+const auLbl=()=>{$('au').textContent='רענון אוטומטי: '+(autoOn?'פעיל':'כבוי');$('au').className=autoOn?'on':''};auLbl();
+$('au').onclick=()=>{autoOn=!autoOn;try{localStorage.setItem('auto',autoOn?'1':'0')}catch(e){}auLbl()};
+async function quick(){
+ if(!autoOn||rfBusy||!isHttp()||!real)return'skip';
+ rfBusy=true;let res='ok';
+ try{
+  const j=await(await fetch('/quotes')).json();if(!j.ok)throw Error(j.error);
+  let ch=false;
+  for(const k in data){const q=j.q[data[k].sym];if(!q)continue;let c2=false;const rows=data[k].rows,L=rows[rows.length-1],t=q.d.split('-'),d=new Date(+t[0],+t[1]-1,+t[2]);
+   if(L.d.getTime()==d.getTime()){if(L.c!=q.p||L.v!=q.v){L.c=q.p;L.v=q.v;c2=true}}else if(d>L.d){rows.push({d,c:q.p,v:q.v});c2=true}
+   if(q.pe&&q.pe!=data[k].pe){data[k].pe=q.pe;c2=true}
+   if(c2){data[k].a=null;ch=true}}
+  if(ch){mkv++;renderList();draw();setTimeout(peCheck,0)}
+  autoStep();
+  $('src').textContent='נתונים אמיתיים · עודכן '+j.t.replace('T',' ').slice(0,19)+' (רענון אוטומטי רציף)'
+ }catch(e){res='err';$('src').textContent='הרענון האוטומטי נכשל, ינסה שוב בעוד חצי דקה'}
+ rfBusy=false;return res}
+(async function loop(){for(;;){const t0=Date.now(),r=await quick();await new Promise(ok=>setTimeout(ok,r=='ok'?Math.max(1000,5000-(Date.now()-t0)):r=='err'?30000:2000))}})();$('bb').onclick=()=>sel&&openTrade(sel,'buy');$('bs').onclick=()=>sel&&openTrade(sel,'sell');
+$('th').onclick=()=>{const d=document.documentElement,dk=d.dataset.theme?d.dataset.theme=='dark':matchMedia('(prefers-color-scheme:dark)').matches;d.dataset.theme=dk?'light':'dark';draw()};
+addEventListener('resize',draw);
+window.TASE_DATA&&Object.keys(window.TASE_DATA.stocks).length?loadReal(window.TASE_DATA):loadDemo();
+syncPF();
+if(!isHttp()&&!hosted())$('src').textContent+=' · נפתח מקובץ: לטעינה אוטומטית פתח דרך http://localhost:8765/';
+if(isHttp()&&stale())fullRefresh();
+
+/* ===== גרסת ענן (אתר מאוחסן): רענון נתונים אוטומטי + התקנה כאפליקציה ===== */
+if(hosted()){
+ let hrBusy=false,hrAt=Date.now();
+ const hostedReload=async()=>{
+  if(hrBusy||optBusy||$('dlg').open)return;
+  hrBusy=true;
+  try{
+   const keep=window.TASE_DATA&&window.TASE_DATA.updated,prev=sel;
+   await new Promise((ok,no)=>{const s=document.createElement('script');s.src='data.js?t='+Date.now();s.charset='utf-8';s.onload=ok;s.onerror=()=>no(Error('x'));document.head.append(s)});
+   if(window.TASE_DATA&&window.TASE_DATA.updated!==keep){loadReal(window.TASE_DATA);if(data[prev]){sel=prev;renderList();draw()}}
+  }catch(e){}
+  hrBusy=false;hrAt=Date.now()};
+ setInterval(()=>{if(!document.hidden)hostedReload()},5*60000);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-hrAt>2*60000)hostedReload()});
+}
+if('serviceWorker' in navigator&&location.protocol==='https:')addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script></body></html>
