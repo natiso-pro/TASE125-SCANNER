@@ -1,15 +1,15 @@
-yaml
-name: עדכון נתונים ופרסום הסורק
+
+name: Update data and publish scanner
 
 on:
   schedule:
-    # ימים שני-שישי, כל חצי שעה בין 07:00 ל-15:30 UTC (מכסה את שעות המסחר בקיץ ובחורף)
+    # Mon-Fri, every 30 min between 07:00 and 15:30 UTC (covers TASE hours, summer and winter)
     - cron: '0,30 7-15 * * 1-5'
-    # ריצה נוספת אחרי הסגירה, לנתוני סוף יום ולדוחות
+    # one more run after the close, for end-of-day data and reports
     - cron: '15 16 * * 1-5'
   push:
-    branches: [main]          # כל העלאה של גרסה חדשה מתפרסמת מיד
-  workflow_dispatch:          # הרצה ידנית מלשונית Actions
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -31,15 +31,15 @@ jobs:
       - uses: actions/configure-pages@v5
         id: pages
 
-      # הנתונים האחרונים שפורסמו (כדי למשוך רק מה שחדש). אם אין - משתמשים ב-data.js שבמאגר.
-      - name: הורדת הנתונים האחרונים מהאתר
+      # latest published data (so only new data is fetched); falls back to data.js from the repo
+      - name: Download latest published data
         run: |
           curl -fsSL --max-time 60 "${{ steps.pages.outputs.base_url }}/data.js" -o data.latest.js || true
           if [ -s data.latest.js ] && head -c 20 data.latest.js | grep -q "TASE_DATA"; then
             mv data.latest.js data.js
-            echo "נטען data.js מהאתר"
+            echo "Loaded data.js from the site"
           else
-            echo "משתמש ב-data.js ההתחלתי מהמאגר"
+            echo "Using the initial data.js from the repo"
           fi
 
       - uses: actions/setup-python@v5
@@ -49,13 +49,13 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      # אם Yahoo חוסם - השלב נכשל (מייל התראה), אבל האתר ממשיך להתפרסם עם הנתונים הקודמים.
-      - name: משיכת נתונים
+      # if Yahoo blocks the run this step fails (email alert) but the site is still published with the previous data
+      - name: Fetch data
         id: fetch
         continue-on-error: true
         run: python fetch_data.py
 
-      - name: הכנת האתר
+      - name: Prepare site
         run: |
           mkdir _site
           cp index.html manifest.webmanifest sw.js icon-*.png data.js _site/
@@ -65,22 +65,22 @@ jobs:
         with:
           path: _site
 
-      # מונע מ-GitHub לכבות את הריצה המתוזמנת אחרי 60 יום בלי פעילות במאגר
-      - name: שמירת הריצה המתוזמנת פעילה
+      # keeps GitHub from disabling the schedule after 60 days without repo activity
+      - name: Keep schedule enabled
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow enable update.yml --repo "${{ github.repository }}"
 
-      - name: סיכום
+      - name: Report fetch failure
         if: steps.fetch.outcome == 'failure'
         run: |
-          echo "::error::משיכת הנתונים נכשלה בריצה הזו (כנראה חסימה זמנית של Yahoo). האתר יפורסם עם הנתונים הקודמים."
+          echo "::error::Data fetch failed in this run (probably a temporary Yahoo block). The site is published with the previous data."
           exit 1
 
   deploy:
     needs: build
-    if: ${{ !cancelled() }}     # מפרסם גם כשמשיכת הנתונים נכשלה (עם הנתונים הקודמים)
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
