@@ -1,0 +1,90 @@
+yaml
+name: עדכון נתונים ופרסום הסורק
+
+on:
+  schedule:
+    # ימים שני-שישי, כל חצי שעה בין 07:00 ל-15:30 UTC (מכסה את שעות המסחר בקיץ ובחורף)
+    - cron: '0,30 7-15 * * 1-5'
+    # ריצה נוספת אחרי הסגירה, לנתוני סוף יום ולדוחות
+    - cron: '15 16 * * 1-5'
+  push:
+    branches: [main]          # כל העלאה של גרסה חדשה מתפרסמת מיד
+  workflow_dispatch:          # הרצה ידנית מלשונית Actions
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  actions: write
+
+concurrency:
+  group: scanner
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/configure-pages@v5
+        id: pages
+
+      # הנתונים האחרונים שפורסמו (כדי למשוך רק מה שחדש). אם אין - משתמשים ב-data.js שבמאגר.
+      - name: הורדת הנתונים האחרונים מהאתר
+        run: |
+          curl -fsSL --max-time 60 "${{ steps.pages.outputs.base_url }}/data.js" -o data.latest.js || true
+          if [ -s data.latest.js ] && head -c 20 data.latest.js | grep -q "TASE_DATA"; then
+            mv data.latest.js data.js
+            echo "נטען data.js מהאתר"
+          else
+            echo "משתמש ב-data.js ההתחלתי מהמאגר"
+          fi
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      # אם Yahoo חוסם - השלב נכשל (מייל התראה), אבל האתר ממשיך להתפרסם עם הנתונים הקודמים.
+      - name: משיכת נתונים
+        id: fetch
+        continue-on-error: true
+        run: python fetch_data.py
+
+      - name: הכנת האתר
+        run: |
+          mkdir _site
+          cp index.html manifest.webmanifest sw.js icon-*.png data.js _site/
+          [ -f tickers_report.txt ] && cp tickers_report.txt _site/ || true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      # מונע מ-GitHub לכבות את הריצה המתוזמנת אחרי 60 יום בלי פעילות במאגר
+      - name: שמירת הריצה המתוזמנת פעילה
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow enable update.yml --repo "${{ github.repository }}"
+
+      - name: סיכום
+        if: steps.fetch.outcome == 'failure'
+        run: |
+          echo "::error::משיכת הנתונים נכשלה בריצה הזו (כנראה חסימה זמנית של Yahoo). האתר יפורסם עם הנתונים הקודמים."
+          exit 1
+
+  deploy:
+    needs: build
+    if: ${{ !cancelled() }}     # מפרסם גם כשמשיכת הנתונים נכשלה (עם הנתונים הקודמים)
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
